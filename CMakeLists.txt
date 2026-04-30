@@ -17,13 +17,19 @@ set(HEADER_DIR ${CMAKE_SOURCE_DIR}/include)
 
 #cmake util function definitions
 include(${CMAKE_SOURCE_DIR}/cmake/utils/compileShader.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/utils/copyAssets.cmake)
 
 #shader source files
 set(SHADER_SLANG_SOURCES ${CMAKE_SOURCE_DIR}/shaders/vertAndFrag.slang)
 
+#CUSTOM COMMANDS
 add_slang_shader_target(mainShaders SOURCES ${SHADER_SLANG_SOURCES})
 
+
+
 add_executable(mainTarget)
+copyAssets(mainTarget)
+
 add_dependencies(mainTarget mainShaders)
 
 #include directories

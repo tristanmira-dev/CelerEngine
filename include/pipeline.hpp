@@ -1,15 +1,21 @@
 #ifndef PIPELINE_HPP
 #define PIPELINE_HPP
 
+#include "pipelineBuilder.hpp"
+
 namespace Celer {
 
 	namespace Core {
 
 		class Pipeline {
 
+			vk::raii::PipelineLayout mPipelineLayout{ nullptr };
+			vk::raii::Pipeline mPipeline{ nullptr };
+
 			public:
-				vk::raii::PipelineLayout mPipelineLayout{ nullptr };
-				vk::raii::Pipeline mPipeline{ nullptr };
+				
+
+				Pipeline(PipelineBuilder const& pipelineBuilder, vk::raii::Device& device);
 
 		};
 

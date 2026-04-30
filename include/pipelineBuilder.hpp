@@ -16,7 +16,6 @@ namespace Celer {
 
 
 				/*DYNAMIC STATES---------------*/
-				std::vector<vk::DynamicState> mDynamicStates;
 				vk::PipelineDynamicStateCreateInfo mDynamicState;
 
 
@@ -42,7 +41,6 @@ namespace Celer {
 				vk::PipelineDepthStencilStateCreateInfo mDepthStencil;
 
 				/*Color Blending*/
-				vk::PipelineColorBlendAttachmentState mColorBlendAttachment;
 				vk::PipelineColorBlendStateCreateInfo mColorBlending;
 
 
@@ -55,6 +53,19 @@ namespace Celer {
 
 				/*Member functions*/
 
+				/**
+				 * @brief Initializes pipeline state CreateInfo structs with default values.
+				 *
+				 * Sets up the following fixed-function pipeline stages:
+				 * - **Dynamic State**: Viewport and scissor set as dynamic
+				 * - **Input Assembly**: Triangle list topology
+				 * - **Viewport State**: Single viewport/scissor (dynamic, no static binding)
+				 * - **Rasterizer**: Fill mode, no culling, CCW front face, no depth bias
+				 * - **Multisampling**: Single sample, no sample shading
+				 * - **Color Blending**: Blending disabled, full RGBA write mask
+				 *
+				 * @note Vertex input, depth/stencil, and push constants are disabled by default (see commented blocks).
+				*/
 				PipelineBuilder();
 
 				/**/
