@@ -16,6 +16,14 @@ namespace Celer {
 			uint32_t graphicsQueueIdx;
 			uint32_t presentQueueIdx;
 		};
+
+
+		struct SwapchainContext {
+			std::vector<vk::Image>* swapchainImages;
+			vk::SurfaceFormatKHR* swapchainSurfaceFormat;
+			std::vector<vk::ImageView>* swapchainImageViews;
+			vk::Extent2D* swapchainExtent;
+		};
 	}
 
 }

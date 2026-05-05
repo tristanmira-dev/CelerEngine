@@ -40,7 +40,17 @@ namespace Celer {
 			};
 		}
 
-		void Swapchain::createSwapchain(vk::raii::Device &device, vk::raii::PhysicalDevice &physicalDevice, vk::raii::SurfaceKHR &surface, GLFWwindow *window) {
+		SwapchainContext Swapchain::getContext() {
+			return SwapchainContext{
+				.swapchainImages = &mSwapchainImages,
+				.swapchainSurfaceFormat = &mSwapchainSurfaceFormat,
+				.swapchainImageViews = &mSwapchainImageViews,
+				.swapchainExtent = &mSwapchainExtent,
+
+			};
+		}
+
+		void Swapchain::createSwapchain(vk::raii::Device &device, vk::raii::PhysicalDevice &physicalDevice, vk::raii::SurfaceKHR &surface, GLFWwindow *window, std::array<uint32_t,2> queueIndices) {
 			
 			auto surfaceCapabilities{ physicalDevice.getSurfaceCapabilitiesKHR(*surface) };
 			mSwapchainSurfaceFormat = chooseSwapSurfaceFormat(physicalDevice.getSurfaceFormatsKHR(*surface));
@@ -57,14 +67,20 @@ namespace Celer {
 				.imageFormat = mSwapchainSurfaceFormat.format,
 				.imageExtent = mSwapchainExtent,
 				.imageArrayLayers = 1,
-				.imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
-				.imageSharingMode = vk::SharingMode::eExclusive, /*Keep in mind this relates to queue families, if you have both the present and graphics family together, just use eExclusive for now*/
+				.imageUsage = vk::ImageUsageFlagBits::eColorAttachment, 
 				.preTransform = surfaceCapabilities.currentTransform,
 				.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
 				.presentMode = chooseSwapPresentMode(physicalDevice.getSurfacePresentModesKHR(*surface)),
 				.clipped = true,
 				.oldSwapchain = nullptr
 			};
+
+			if (queueIndices[0] == queueIndices[1]) swapChainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
+			else {
+				swapChainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
+				swapChainCreateInfo.pQueueFamilyIndices = queueIndices.data();
+				swapChainCreateInfo.queueFamilyIndexCount = 2;
+			}
 
 			mSwapchain = vk::raii::SwapchainKHR(device, swapChainCreateInfo);
 			mSwapchainImages = mSwapchain.getImages(); /*3 images In this case (default value) */

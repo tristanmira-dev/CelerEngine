@@ -9,13 +9,11 @@ namespace Celer {
 
 				vk::raii::ShaderModule mShaderModule{ nullptr };
 
-				vk::PipelineShaderStageCreateInfo mVertShaderStageInfo;
-				vk::PipelineShaderStageCreateInfo mFragShaderStageInfo;
-
-				vk::PipelineShaderStageCreateInfo mShadersStage;
+				std::vector<vk::PipelineShaderStageCreateInfo> mShadersStage;
 
 
 				/*DYNAMIC STATES---------------*/
+				std::vector<vk::DynamicState> mDynamicStates;
 				vk::PipelineDynamicStateCreateInfo mDynamicState;
 
 
@@ -69,6 +67,11 @@ namespace Celer {
 				PipelineBuilder();
 
 				/**/
+
+
+				void createShader(std::string const& path, std::vector<vk::PipelineShaderStageCreateInfo>& shaderStages, vk::raii::Device &device);
+
+				vk::raii::ShaderModule createShaderModule(std::vector<char> const& shaderData, vk::raii::Device& device) const;
 
 
 

@@ -5,6 +5,8 @@
 #include "window.hpp"
 #include "contexts.hpp"
 #include "swapchain.hpp"
+#include "pipelineBuilder.hpp"
+#include "pipeline.hpp"
 
 
 namespace Celer {
@@ -17,15 +19,22 @@ namespace Celer {
 
 				/*Private Objects*/
 
-				Window window;
-				VulkanInstance vulkanInstance;
-				Swapchain swapchain;
+				Window mWindow;
+				VulkanInstance mVulkanInstance;
+				Swapchain mSwapchain;
+				Pipeline mPipeline; /*remove later pls*/
 
 				/*Contexts*/
 
-				VulkanContext vulkanContext;
+				VulkanContext mVulkanContext;
+				SwapchainContext mSwapChainContext;
+
 
 				/*Private Functions*/
+
+
+				
+
 
 			public:
 				CelerEngine();

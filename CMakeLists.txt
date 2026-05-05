@@ -12,9 +12,6 @@ find_package (glfw3 REQUIRED)
 find_package (Stb REQUIRED)
 find_package (tinyobjloader REQUIRED)
 
-set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
-set(HEADER_DIR ${CMAKE_SOURCE_DIR}/include)
-
 #cmake util function definitions
 include(${CMAKE_SOURCE_DIR}/cmake/utils/compileShader.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/utils/copyAssets.cmake)
@@ -32,8 +29,16 @@ copyAssets(mainTarget)
 
 add_dependencies(mainTarget mainShaders)
 
+#VARS FOR SRC AND HEADER FILES ----------------------------------------------------------------------
+set(CORE_DIR ${CMAKE_SOURCE_DIR}/src/Core)
+set(CORE_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Core)
+
+set(RENDER_DIR ${CMAKE_SOURCE_DIR}/src/Render)
+set(RENDER_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Render)
+
 #include directories
-target_include_directories(mainTarget PRIVATE ${HEADER_DIR})
+target_include_directories(mainTarget PRIVATE ${CORE_HEADER_DIR})
+target_include_directories(mainTarget PRIVATE ${RENDER_HEADER_DIR})
 
 #defines----------------------------------------------------------------------------------------
 target_compile_definitions(mainTarget PRIVATE VULKAN_HPP_NO_STRUCT_CONSTRUCTORS) #CPP 20 feature
@@ -49,26 +54,27 @@ target_include_directories(mainTarget PRIVATE ${Stb_INCLUDE_DIR})
 target_precompile_headers(mainTarget PRIVATE <iostream> <string> <vector> <array> <cstdlib> <algorithm> <memory> <stdexcept> <vulkan/vulkan_raii.hpp> <GLFW/glfw3.h>)
 
 #EXTRA SOURCES----------------------------------
+
 target_sources( mainTarget PRIVATE 
-    ${SRC_DIR}/main.cpp #entry point
-    ${SRC_DIR}/celerEngine.cpp
-    ${SRC_DIR}/vulkanInstance.cpp
-    ${SRC_DIR}/extensions.cpp
-    ${SRC_DIR}/window.cpp
-    ${SRC_DIR}/swapchain.cpp
-    ${SRC_DIR}/pipeline.cpp
-    ${SRC_DIR}/pipelineBuilder.cpp
+    ${CORE_DIR}/main.cpp #entry point
+    ${CORE_DIR}/celerEngine.cpp
+    ${CORE_DIR}/vulkanInstance.cpp
+    ${CORE_DIR}/extensions.cpp
+    ${CORE_DIR}/window.cpp
+    ${CORE_DIR}/swapchain.cpp
+    ${RENDER_DIR}/pipeline.cpp
+    ${RENDER_DIR}/pipelineBuilder.cpp
 )
 
 target_sources( mainTarget PRIVATE 
-    ${HEADER_DIR}/celerEngine.hpp
-    ${HEADER_DIR}/vulkanInstance.hpp
-    ${HEADER_DIR}/contexts.hpp
-    ${HEADER_DIR}/extensions.hpp
-    ${HEADER_DIR}/window.hpp
-    ${HEADER_DIR}/swapchain.hpp
-    ${HEADER_DIR}/pipeline.hpp
-    ${HEADER_DIR}/pipelineBuilder.hpp
+    ${CORE_HEADER_DIR}/celerEngine.hpp
+    ${CORE_HEADER_DIR}/vulkanInstance.hpp
+    ${CORE_HEADER_DIR}/contexts.hpp
+    ${CORE_HEADER_DIR}/extensions.hpp
+    ${CORE_HEADER_DIR}/window.hpp
+    ${CORE_HEADER_DIR}/swapchain.hpp
+    ${RENDER_HEADER_DIR}/pipeline.hpp
+    ${RENDER_HEADER_DIR}/pipelineBuilder.hpp
 )
 
 #dependencies------------------------------------------------------------------------------------

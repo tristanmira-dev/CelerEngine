@@ -5,7 +5,7 @@ function (copyAssets TARGET)
 	
   add_custom_command (
           TARGET ${TARGET} POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/extern/assets ${ASSETS_OUTPUT_DIR}
+          COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${CMAKE_SOURCE_DIR}/extern/assets ${ASSETS_OUTPUT_DIR}
           WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
           COMMENT "Copying Assets"
           VERBATIM

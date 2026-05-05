@@ -1,6 +1,8 @@
 #ifndef SWAPCHAIN_HPP
 #define SWAPCHAIN_HPP
 
+#include "contexts.hpp"
+
 namespace Celer {
 	namespace Core {
 		class Swapchain {
@@ -35,15 +37,16 @@ namespace Celer {
 				*/
 				vk::Extent2D chooseSwapExtent(vk::SurfaceCapabilitiesKHR const& capabilities, GLFWwindow* window);
 
-				/**/
+				
+
 
 			public:
 
 				Swapchain(uint32_t swapchainImages = 3);
 				~Swapchain() = default;
 
-				void createSwapchain(vk::raii::Device& device, vk::raii::PhysicalDevice& physicalDevice, vk::raii::SurfaceKHR& surface, GLFWwindow* window);
-
+				void createSwapchain(vk::raii::Device& device, vk::raii::PhysicalDevice& physicalDevice, vk::raii::SurfaceKHR& surface, GLFWwindow* window, std::array<uint32_t, 2> queueIndices);
+				SwapchainContext getContext();
 		};
 	}
 }
