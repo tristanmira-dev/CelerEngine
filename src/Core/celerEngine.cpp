@@ -7,12 +7,14 @@ namespace Celer {
 
 	namespace Core {
 
-		CelerEngine::CelerEngine() : mWindow{ "Vulkan", 1000, 800 }, mVulkanInstance{}, mVulkanContext{ mVulkanInstance.getVulkanContext() } {
+		CelerEngine::CelerEngine() : mWindow{ "Vulkan", 1000, 800 }, mVulkanInstance{} {
 
 			/*Vulkan Instance Init*/
-			mVulkanInstance.createSurface(mWindow.createSurface(*mVulkanContext.instance));
-			mVulkanInstance.pickPhysicalDevice();
+			mVulkanInstance.createSurface(mWindow.createSurface(mVulkanInstance.getInstance()));
+			mVulkanInstance.pickPhysicalDevice();	
 			mVulkanInstance.createLogicalDevice();
+			mVulkanContext = mVulkanInstance.getVulkanContext();
+
 
 			/*Swapchain Init*/
 			mSwapchain.createSwapchain(*mVulkanContext.device, *mVulkanContext.physicalDevice, *mVulkanContext.surface, mWindow.getWindow(), std::array<uint32_t, 2>{mVulkanContext.graphicsQueueIdx, mVulkanContext.presentQueueIdx});
@@ -25,15 +27,17 @@ namespace Celer {
 				vk::PipelineShaderStageCreateInfo{.stage = vk::ShaderStageFlagBits::eFragment, .pName = "fragMain" }
 			};
 
-			PipelineBuilder pipelineBuilder;
+			Render::PipelineBuilder pipelineBuilder;
 			pipelineBuilder.createShader(
 				"./assets/shaders/slang.spv",
 				shader,
 				*mVulkanContext.device
 			);
 
+			/*UNIT TEST---------------------------------------------------------------------------------------------->*/
 			mPipeline.setPipeline(pipelineBuilder, *mVulkanContext.device, *mSwapChainContext.swapchainSurfaceFormat);
-			
+
+			mCommandBuffer = Wrapper::CommandBuffer(*mVulkanContext.device, 1, mVulkanContext.graphicsQueueIdx);
 			
 
 

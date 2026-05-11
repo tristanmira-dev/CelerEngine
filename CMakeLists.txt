@@ -36,9 +36,13 @@ set(CORE_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Core)
 set(RENDER_DIR ${CMAKE_SOURCE_DIR}/src/Render)
 set(RENDER_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Render)
 
+set(WRAPPER_DIR ${CMAKE_SOURCE_DIR}/src/Wrapper)
+set(WRAPPER_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Wrapper)
+
 #include directories
 target_include_directories(mainTarget PRIVATE ${CORE_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${RENDER_HEADER_DIR})
+target_include_directories(mainTarget PRIVATE ${WRAPPER_HEADER_DIR})
 
 #defines----------------------------------------------------------------------------------------
 target_compile_definitions(mainTarget PRIVATE VULKAN_HPP_NO_STRUCT_CONSTRUCTORS) #CPP 20 feature
@@ -64,6 +68,9 @@ target_sources( mainTarget PRIVATE
     ${CORE_DIR}/swapchain.cpp
     ${RENDER_DIR}/pipeline.cpp
     ${RENDER_DIR}/pipelineBuilder.cpp
+    ${RENDER_DIR}/renderer.cpp
+    ${WRAPPER_DIR}/commandBuffer.cpp
+    ${WRAPPER_DIR}/image.cpp
 )
 
 target_sources( mainTarget PRIVATE 
@@ -75,6 +82,10 @@ target_sources( mainTarget PRIVATE
     ${CORE_HEADER_DIR}/swapchain.hpp
     ${RENDER_HEADER_DIR}/pipeline.hpp
     ${RENDER_HEADER_DIR}/pipelineBuilder.hpp
+    ${RENDER_HEADER_DIR}/render_types.hpp
+    ${RENDER_HEADER_DIR}/renderer.hpp
+    ${WRAPPER_HEADER_DIR}/commandBuffer.hpp
+    ${WRAPPER_HEADER_DIR}/image.hpp
 )
 
 #dependencies------------------------------------------------------------------------------------

@@ -74,6 +74,10 @@ namespace Celer {
 
 				void createLogicalDevice();
 
+				inline vk::raii::Instance& getInstance() {
+					return mInstance;
+				}
+
 
 
 

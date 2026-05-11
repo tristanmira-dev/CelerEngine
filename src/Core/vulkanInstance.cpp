@@ -212,6 +212,7 @@ namespace Celer {
 
 		}
 
+
 		void VulkanInstance::createSurface(VkSurfaceKHR surface) {
 
 			mSurface = vk::raii::SurfaceKHR{ mInstance, surface };

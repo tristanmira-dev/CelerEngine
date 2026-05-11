@@ -5,7 +5,7 @@
 
 namespace Celer {
 
-	namespace Core {
+	namespace Render {
 
 		class Pipeline {
 

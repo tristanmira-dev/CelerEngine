@@ -8,7 +8,7 @@ namespace {
 }
 
 namespace Celer {
-	namespace Core {
+	namespace Render {
 		PipelineBuilder::PipelineBuilder() {
 
 			/*DYNAMIC STATES---------------*/

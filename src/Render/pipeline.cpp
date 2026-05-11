@@ -1,7 +1,7 @@
 #include "pipeline.hpp"
 
 namespace Celer {
-	namespace Core {
+	namespace Render {
 		void Pipeline::setPipeline(PipelineBuilder const& pipelineBuilder, vk::raii::Device &device, vk::SurfaceFormatKHR& swapchainSurfaceFormat) {
 			vk::PipelineLayoutCreateInfo layoutCreateInfo{ .setLayoutCount = 0, .pSetLayouts = nullptr ,.pushConstantRangeCount = 0, .pPushConstantRanges = nullptr }; /*"my shaders don't use any uniforms or push constants right now."*/
 			mPipelineLayout = vk::raii::PipelineLayout(device, layoutCreateInfo);

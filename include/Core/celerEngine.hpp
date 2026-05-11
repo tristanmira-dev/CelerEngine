@@ -7,6 +7,7 @@
 #include "swapchain.hpp"
 #include "pipelineBuilder.hpp"
 #include "pipeline.hpp"
+#include "commandBuffer.hpp"
 
 
 namespace Celer {
@@ -22,7 +23,8 @@ namespace Celer {
 				Window mWindow;
 				VulkanInstance mVulkanInstance;
 				Swapchain mSwapchain;
-				Pipeline mPipeline; /*remove later pls*/
+				Render::Pipeline mPipeline; /*remove later pls*/
+				Wrapper::CommandBuffer mCommandBuffer;
 
 				/*Contexts*/
 

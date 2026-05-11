@@ -3,7 +3,7 @@
 
 namespace Celer {
 	/*INCLUDES BOILERPLATE DEFAULT PIPELINE BUILDER OBJECTS!*/
-	namespace Core {
+	namespace Render {
 		class PipelineBuilder {
 			public:
 
