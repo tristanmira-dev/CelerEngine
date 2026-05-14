@@ -1,6 +1,8 @@
 #ifndef CONTEXTS_HPP
 #define CONTEXTS_HPP
 
+#include "image.hpp"
+
 namespace Celer {
 	
 	namespace Core {
@@ -19,10 +21,12 @@ namespace Celer {
 
 
 		struct SwapchainContext {
-			std::vector<vk::Image>* swapchainImages;
+			//std::vector<vk::Image>* swapchainImages;
 			vk::SurfaceFormatKHR* swapchainSurfaceFormat;
-			std::vector<vk::ImageView>* swapchainImageViews;
+			//std::vector<vk::ImageView>* swapchainImageViews;
 			vk::Extent2D* swapchainExtent;
+			
+			Wrapper::NonOwnedImageCollection* swapChainImages;
 		};
 	}
 

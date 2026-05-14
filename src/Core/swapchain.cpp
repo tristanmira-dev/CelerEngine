@@ -42,10 +42,12 @@ namespace Celer {
 
 		SwapchainContext Swapchain::getContext() {
 			return SwapchainContext{
-				.swapchainImages = &mSwapchainImages,
+				//.swapchainImages = &mSwapchainImages,
 				.swapchainSurfaceFormat = &mSwapchainSurfaceFormat,
-				.swapchainImageViews = &mSwapchainImageViews,
+				//.swapchainImageViews = &mSwapchainImageViews,
 				.swapchainExtent = &mSwapchainExtent,
+
+				.swapChainImages = &mSwapchainImages
 
 			};
 		}
@@ -83,13 +85,22 @@ namespace Celer {
 			}
 
 			mSwapchain = vk::raii::SwapchainKHR(device, swapChainCreateInfo);
-			mSwapchainImages = mSwapchain.getImages(); /*3 images In this case (default value) */
 
-			std::cout << "Swapchain images: " << mSwapchainImages.size() << "\n";
+			std::cout << "Swapchain images: " << mSwapchain.getImages().size() /*3 images In this case (default value) */ << "\n";
 			std::cout << "Format: " << vk::to_string(mSwapchainSurfaceFormat.format) << "\n";
 			std::cout << "Extent: " << mSwapchainExtent.width << "x" << mSwapchainExtent.height << "\n";
 			std::cout << physicalDevice.getProperties().deviceName << '\n';
 
+		}
+
+
+		void Swapchain::createImageView(vk::raii::Device &device) {
+
+			std::vector<vk::Image> images{ mSwapchain.getImages() };
+
+			mSwapchainImages.addImagesWithView(images, mSwapchainSurfaceFormat.format, device);
+			std::cout << "Swapchain image (handle to non-owned) and imageviews created!\n";
+		
 		}
 
 	}

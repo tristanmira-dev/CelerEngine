@@ -25,6 +25,8 @@ namespace Celer {
 
 				bool shouldClose();
 
+				void pollEvents();
+
 				inline GLFWwindow* getWindow() { return window; }
 
 				VkSurfaceKHR createSurface(vk::raii::Instance& instance);

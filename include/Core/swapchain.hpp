@@ -2,6 +2,7 @@
 #define SWAPCHAIN_HPP
 
 #include "contexts.hpp"
+#include "image.hpp"
 
 namespace Celer {
 	namespace Core {
@@ -15,9 +16,8 @@ namespace Celer {
 				/*Vulkan objects*/
 
 				vk::raii::SwapchainKHR mSwapchain{ nullptr };
-				std::vector<vk::Image> mSwapchainImages;
 				vk::SurfaceFormatKHR mSwapchainSurfaceFormat;
-				std::vector<vk::ImageView> mSwapchainImageViews;
+				Wrapper::NonOwnedImageCollection mSwapchainImages;
 				vk::Extent2D mSwapchainExtent;
 
 				/*Functions*/
@@ -45,7 +45,8 @@ namespace Celer {
 				Swapchain(uint32_t swapchainImages = 3);
 				~Swapchain() = default;
 
-				void createSwapchain(vk::raii::Device& device, vk::raii::PhysicalDevice& physicalDevice, vk::raii::SurfaceKHR& surface, GLFWwindow* window, std::array<uint32_t, 2> queueIndices);
+				void createSwapchain(vk::raii::Device &device, vk::raii::PhysicalDevice& physicalDevice, vk::raii::SurfaceKHR& surface, GLFWwindow* window, std::array<uint32_t, 2> queueIndices);
+				void createImageView(vk::raii::Device &device);
 				SwapchainContext getContext();
 		};
 	}

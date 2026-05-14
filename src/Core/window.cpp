@@ -31,6 +31,10 @@ namespace Celer {
 			return glfwWindowShouldClose(window);
 		}
 
+		void Window::pollEvents() {
+			glfwPollEvents();
+		}
+
 		VkSurfaceKHR Window::createSurface(vk::raii::Instance &instance) {
 			VkSurfaceKHR surface;
 			glfwCreateWindowSurface(*instance, window, nullptr, &surface);

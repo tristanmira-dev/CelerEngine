@@ -49,15 +49,14 @@ namespace Celer {
 			mColorBlending = vk::PipelineColorBlendStateCreateInfo{ .logicOpEnable = vk::False, .logicOp = vk::LogicOp::eCopy, .attachmentCount = 1, .pAttachments = &colorBlendAttachment };
 
 		}
-		void PipelineBuilder::createShader(std::string const& path, std::vector<vk::PipelineShaderStageCreateInfo> & shaderStages, vk::raii::Device& device) {
+		void PipelineBuilder::addShaderStage(vk::ShaderStageFlagBits stage, const char* name) {
+		
+			mShadersStage.emplace_back(vk::PipelineShaderStageCreateInfo{ .stage = stage, .module = mShaderModule, .pName = name });
+
+		}
+		void PipelineBuilder::createShader(std::string const& path, vk::raii::Device& device) {
 		
 			mShaderModule = createShaderModule(readFile(path), device);
-
-			std::for_each(shaderStages.begin(), shaderStages.end(), [this](vk::PipelineShaderStageCreateInfo &stageCreateInfo) {
-				stageCreateInfo.module = this->mShaderModule;
-			});
-
-			mShadersStage = shaderStages;
 
 		}
 

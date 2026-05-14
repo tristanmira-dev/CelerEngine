@@ -69,7 +69,10 @@ namespace Celer {
 				/**/
 
 
-				void createShader(std::string const& path, std::vector<vk::PipelineShaderStageCreateInfo>& shaderStages, vk::raii::Device &device);
+				void addShaderStage(vk::ShaderStageFlagBits stage, const char *name);
+
+
+				void createShader(std::string const& path, vk::raii::Device &device);
 
 				vk::raii::ShaderModule createShaderModule(std::vector<char> const& shaderData, vk::raii::Device& device) const;
 

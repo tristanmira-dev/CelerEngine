@@ -18,21 +18,23 @@ namespace Celer {
 
 			/*Swapchain Init*/
 			mSwapchain.createSwapchain(*mVulkanContext.device, *mVulkanContext.physicalDevice, *mVulkanContext.surface, mWindow.getWindow(), std::array<uint32_t, 2>{mVulkanContext.graphicsQueueIdx, mVulkanContext.presentQueueIdx});
+			mSwapchain.createImageView(*mVulkanContext.device);
 			mSwapChainContext = mSwapchain.getContext();
 
 
-			/*Pipeline*/
-			std::vector<vk::PipelineShaderStageCreateInfo> shader = {
-				vk::PipelineShaderStageCreateInfo{.stage = vk::ShaderStageFlagBits::eVertex, .pName = "vertMain" },
-				vk::PipelineShaderStageCreateInfo{.stage = vk::ShaderStageFlagBits::eFragment, .pName = "fragMain" }
-			};
 
+			/*Pipeline*/
 			Render::PipelineBuilder pipelineBuilder;
+
 			pipelineBuilder.createShader(
 				"./assets/shaders/slang.spv",
-				shader,
 				*mVulkanContext.device
 			);
+
+			pipelineBuilder.addShaderStage(vk::ShaderStageFlagBits::eVertex, "vertMain");
+			pipelineBuilder.addShaderStage(vk::ShaderStageFlagBits::eFragment, "fragMain");
+
+			
 
 			/*UNIT TEST---------------------------------------------------------------------------------------------->*/
 			mPipeline.setPipeline(pipelineBuilder, *mVulkanContext.device, *mSwapChainContext.swapchainSurfaceFormat);
@@ -47,7 +49,7 @@ namespace Celer {
 		void CelerEngine::run() {
 
 			while (!mWindow.shouldClose()) {
-				glfwPollEvents();
+				mWindow.pollEvents();
 			}
 
 		}
