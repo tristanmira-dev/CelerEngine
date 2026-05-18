@@ -1,7 +1,7 @@
 #include "vulkanInstance.hpp"
 #include "extensions.hpp"
 
-#include <set>
+#include <map>
 
 namespace {
 	/*
@@ -17,6 +17,12 @@ namespace {
 
 		return vk::False;
 	}
+
+
+	struct DeviceScore {
+		vk::raii::PhysicalDevice const* physDevice{ nullptr };
+		int score;
+	};
 
 
 }
@@ -103,43 +109,64 @@ namespace Celer {
 		}
 
 		void VulkanInstance::pickPhysicalDevice() {
+
+			std::vector<DeviceScore> score;
+
 			auto devices{ mInstance.enumeratePhysicalDevices() }; /*Get physical devices*/
-			const auto devicesIter{
 
-				std::ranges::find_if(devices, [&](vk::raii::PhysicalDevice const& device) {
-					auto queueFamilies{device.getQueueFamilyProperties()};
-					bool isSuitable{ device.getProperties().apiVersion >= VK_API_VERSION_1_3 };
+			for (uint32_t i{}; i < devices.size(); ++i) {
+				auto props{ devices[i].getProperties()};
 
-					/*In a gpu, there are different 'families' called queue families that deal with different tasks. think of it like individual factories that are in charge of producing different items*/
-					const auto qfpIter{
-						std::ranges::find_if(queueFamilies, [](vk::QueueFamilyProperties const& queueProps) {
-							return (queueProps.queueFlags & vk::QueueFlagBits::eGraphics) != static_cast<vk::QueueFlags>(0); /*just to make sure the graphics part of the family is supported*/
-						})
-					};
+				DeviceScore currentScore{
+					&devices[i],
+					0
+				};
 
-					isSuitable = isSuitable && (qfpIter != queueFamilies.end());
+				auto queueFamilies{ devices[i].getQueueFamilyProperties()};
+				bool isSuitable{ devices[i].getProperties().apiVersion >= VK_API_VERSION_1_3};
 
-					auto extensions = device.enumerateDeviceExtensionProperties();
-					bool found{ true };
 
-					/*Just seeing if the current physical device in the iteration can accomodate presenting on the monitor*/
-					for (char const* const& extension : mDeviceExtensions) {
-						auto extensionIter{ std::ranges::find_if(extensions, [extension](vk::ExtensionProperties const& props) {
-							return std::strcmp(extension, props.extensionName) == 0;
-						})};
+				const auto queueFamilyIterator{
+					std::ranges::find_if(queueFamilies, [](vk::QueueFamilyProperties const& queueProps) {
+						return (queueProps.queueFlags & vk::QueueFlagBits::eGraphics) != static_cast<vk::QueueFlags>(0);
+					})
+				};
 
-						found = found && extensionIter != extensions.end();
-					}
+				isSuitable = isSuitable && (queueFamilies.end() != queueFamilyIterator);
 
-					isSuitable = found && isSuitable;
+				if (isSuitable) currentScore.score += 100;
+				else continue;
 
-					return isSuitable;
-				})
+				if (props.deviceType != vk::PhysicalDeviceType::eIntegratedGpu) currentScore.score += 50;
 
-			};
+				auto extensions = devices[i].enumerateDeviceExtensionProperties();
+				bool found{ true };
 
-			if (devices.empty() || (devicesIter == devices.end())) { throw std::runtime_error{ "Mate you don't even have a proper GPU" }; }
-			mPhysicalDevice = *devicesIter;
+				/*Just seeing if the current physical device in the iteration can accomodate presenting on the monitor*/
+				for (char const* const& extension : mDeviceExtensions) {
+					auto extensionIter{ std::ranges::find_if(extensions, [extension](vk::ExtensionProperties const& props) {
+						return std::strcmp(extension, props.extensionName) == 0;
+					}) };
+
+					found = found && extensionIter != extensions.end();
+				}
+
+				isSuitable = found && isSuitable;
+
+				if (isSuitable) {
+					currentScore.score += 100;
+					score.emplace_back(currentScore);
+				}
+				else continue;
+
+			}
+
+			std::sort(score.begin(), score.end(), [](const DeviceScore& prev, const DeviceScore& next) {
+				return prev.score > next.score;
+			});
+
+			if (score.empty()) { throw std::runtime_error{ "Mate you don't even have a proper GPU" }; }
+			mPhysicalDevice = *score[0].physDevice;
 		}
 
 		void VulkanInstance::createLogicalDevice() {
