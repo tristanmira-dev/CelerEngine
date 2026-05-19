@@ -3,6 +3,7 @@
 
 #include "contexts.hpp"
 #include "image.hpp"
+#include "window.hpp"
 
 namespace Celer {
 	namespace Core {
@@ -42,7 +43,7 @@ namespace Celer {
 
 			public:
 
-				Swapchain(uint32_t swapchainImages = 3);
+				Swapchain(VulkanContext& vulkanContext, SwapchainContext& swapchainContext, Window& mWindow, uint32_t swapchainImages = 3);
 				~Swapchain() = default;
 
 				void createSwapchain(vk::raii::Device &device, vk::raii::PhysicalDevice& physicalDevice, vk::raii::SurfaceKHR& surface, GLFWwindow* window, std::array<uint32_t, 2> queueIndices);

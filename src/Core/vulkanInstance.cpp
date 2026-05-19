@@ -239,7 +239,6 @@ namespace Celer {
 
 		}
 
-
 		void VulkanInstance::createSurface(VkSurfaceKHR surface) {
 
 			mSurface = vk::raii::SurfaceKHR{ mInstance, surface };
@@ -259,12 +258,18 @@ namespace Celer {
 			};
 		}
 
-		VulkanInstance::VulkanInstance() {
+		VulkanInstance::VulkanInstance(Window &window, VulkanContext& vulkanContext) {
 			initInstance();
 			setupDebugMessenger();
 			//instance.submitDebugUtilsMessageEXT(vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
 			//	vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral, vk::DebugUtilsMessengerCallbackDataEXT{ .pMessage = physicalDevice.getProperties().deviceName });
+			createSurface(window.createSurface(mInstance));
+			pickPhysicalDevice();
+			createLogicalDevice();
+
+			vulkanContext = getVulkanContext();
 		}
+
 
 		
 

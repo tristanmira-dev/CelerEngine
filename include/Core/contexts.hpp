@@ -27,6 +27,8 @@ namespace Celer {
 			vk::Extent2D* swapchainExtent;
 			
 			Wrapper::NonOwnedImageCollection* swapChainImages;
+
+			vk::raii::SwapchainKHR* swapchain;
 		};
 	}
 

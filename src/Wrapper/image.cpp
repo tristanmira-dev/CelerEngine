@@ -2,12 +2,12 @@
 
 namespace {
 	template<typename ImageType>
-	vk::Image const& getUnderlyingImage(ImageType& image) {
+	inline vk::Image const& getUnderlyingImage(ImageType& image) {
 		return image;
 	}
 
 	template<>
-	vk::Image const& getUnderlyingImage<vk::raii::Image>(vk::raii::Image& image) {
+	inline vk::Image const& getUnderlyingImage<vk::raii::Image>(vk::raii::Image& image) {
 		return *image;
 	}
 }
@@ -24,9 +24,38 @@ namespace Celer {
 		Image<ImageType>::Image(ImageType &&image, vk::raii::ImageView &&imageView) : mImage{ std::move(image) }, mImageView{ std::move(imageView) } { }
 
 		template<typename ImageType>
-		Image<ImageType>::Image(Image<ImageType>&& image) noexcept : mImage{ std::move(image.mImage) }, mImageView{std::move(image.mImageView)} { }
+		Image<ImageType>::Image(Image<ImageType>&& image) noexcept : mImage{ std::move(image.mImage) }, mImageView{ std::move(image.mImageView) } {}
+
+		template<typename ImageType>
+		void Image<ImageType>::transitionImageLayout(vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::AccessFlags2 srcAccessMask, vk::AccessFlags2 dstAccessMask, vk::PipelineStageFlags2 srcStageMask, vk::PipelineStageFlags2 dstStageMask, vk::ImageAspectFlags aspectFlag, vk::raii::CommandBuffer& commandBuff) {
+			vk::ImageMemoryBarrier2 imageTransitionAndWait {
+				.srcStageMask = srcStageMask,
+				.srcAccessMask = srcAccessMask,
+				.dstStageMask = dstStageMask,
+				.dstAccessMask = dstAccessMask,
+				.oldLayout = oldLayout,
+				.newLayout = newLayout,
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.image = getUnderlyingImage(mImage),
+				.subresourceRange = {
+					.aspectMask = aspectFlag,
+					.baseMipLevel = 0,
+					.levelCount = 1,
+					.baseArrayLayer = 0,
+					.layerCount = 1
+				}
+			};
 
 
+			vk::DependencyInfo dependencyInfo{
+				.dependencyFlags = {},
+				.imageMemoryBarrierCount = 1,
+				.pImageMemoryBarriers = &imageTransitionAndWait /* "everything before this barrier must finish before anything after it can start.", The layout transition is the barrier */
+			};
+
+			commandBuff.pipelineBarrier2(dependencyInfo);
+		}
 
 		/*ImageCollection DEFINITIONS!*/
 
@@ -48,6 +77,7 @@ namespace Celer {
 			std::for_each(images.begin(), images.end(), [this, &imageViewCreateInfo, &device](ImageType &image) {
 				imageViewCreateInfo.image = getUnderlyingImage(image);
 				this->mImageCollection.emplace_back( std::move(image), vk::raii::ImageView(device, imageViewCreateInfo) );
+				++mSize;
 			});
 		
 		}

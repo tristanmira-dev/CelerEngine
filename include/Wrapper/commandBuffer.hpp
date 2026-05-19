@@ -17,7 +17,9 @@ namespace Celer {
 				CommandBuffer() = default;
 				CommandBuffer(vk::raii::Device& device, uint32_t count, uint32_t queueFamilyIdx, vk::CommandBufferLevel bufferLevel = vk::CommandBufferLevel::ePrimary);
 
-				vk::raii::CommandBuffer& getCommandBuffer(uint32_t idx);
+				inline vk::raii::CommandBuffer& getCommandBuffer(uint32_t idx) {
+					return mCommandBuffers[idx];
+				}
 
 		};
 	

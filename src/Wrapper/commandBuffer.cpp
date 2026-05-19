@@ -16,9 +16,7 @@ namespace Celer {
 			
 		}
 
-		vk::raii::CommandBuffer& CommandBuffer::getCommandBuffer(uint32_t idx) {
-			return mCommandBuffers[idx];
-		}
+		
 
 
 

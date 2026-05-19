@@ -2,6 +2,7 @@
 #define VULKANINSTANCE_HPP
 
 #include "contexts.hpp"
+#include "window.hpp"
 
 namespace Celer {
 
@@ -60,7 +61,9 @@ namespace Celer {
 
 
 			public:
-				VulkanInstance();
+
+
+				VulkanInstance(Window& window, VulkanContext& vulkanContext);
 				~VulkanInstance() = default;
 				
 				/*
@@ -77,6 +80,8 @@ namespace Celer {
 				inline vk::raii::Instance& getInstance() {
 					return mInstance;
 				}
+
+				void init(vk::SurfaceKHR& surface);
 
 
 

@@ -11,10 +11,16 @@ namespace Celer {
 				ImageType mImage;
 			public:
 				vk::raii::ImageView mImageView{ nullptr };
-				
+
+				inline ImageType& getImage() {
+					return mImage;
+				}
+	
 				Image(ImageType &&image, vk::raii::ImageView &&imageView);
 
 				Image(Image&& image) noexcept;
+
+				void transitionImageLayout(vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::AccessFlags2 srcAccessMask, vk::AccessFlags2 dstAccessMask, vk::PipelineStageFlags2 srcStageMask, vk::PipelineStageFlags2 dstStageMask, vk::ImageAspectFlags aspectFlag, vk::raii::CommandBuffer& commandBuff);
 
 				~Image() = default;
 		};
@@ -24,11 +30,20 @@ namespace Celer {
 
 			private:
 				std::vector<Image<ImageType>> mImageCollection;
+				std::size_t mSize{};
 				
 			public:
 
+				inline std::size_t getSize() {
+					return mSize;
+				}
+
 				void clear();
 				void addImagesWithView(std::vector<ImageType> images, vk::Format format, vk::raii::Device& device);
+
+				inline Image<ImageType>& getImage(uint32_t imageIdx) {
+					return mImageCollection[imageIdx];
+				}
 				//void addImages(std::vector<ImageType> const &images);
 
 				~ImageCollection();

@@ -8,6 +8,7 @@
 #include "pipelineBuilder.hpp"
 #include "pipeline.hpp"
 #include "commandBuffer.hpp"
+#include "renderer.hpp"
 
 
 namespace Celer {
@@ -18,28 +19,26 @@ namespace Celer {
 			
 			private:
 
+				/*Contexts*/
+
+				VulkanContext mVulkanContext;
+				SwapchainContext mSwapChainContext;
+
 				/*Private Objects*/
 
 				Window mWindow;
 				VulkanInstance mVulkanInstance;
 				Swapchain mSwapchain;
 				Render::Pipeline mPipeline; /*remove later pls*/
-				Wrapper::CommandBuffer mCommandBuffer;
+				//Wrapper::CommandBuffer mCommandBuffer;
 
-				/*Contexts*/
-
-				VulkanContext mVulkanContext;
-				SwapchainContext mSwapChainContext;
-
+				Render::Renderer mRenderer;
 
 				/*Private Functions*/
 
-
-				
-
-
 			public:
 				CelerEngine();
+
 				void run();
 
 		};

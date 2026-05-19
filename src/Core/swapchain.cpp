@@ -3,7 +3,13 @@
 namespace Celer {
 	namespace Core {
 		
-		Swapchain::Swapchain(uint32_t swapchainImages) : mSwapchainImagesCount{ swapchainImages } { /*Empty by design*/ }
+		Swapchain::Swapchain(VulkanContext& vulkanContext, SwapchainContext& swapchainContext, Window& mWindow, uint32_t swapchainImages) : mSwapchainImagesCount{ swapchainImages } {
+		
+			createSwapchain(*vulkanContext.device, *vulkanContext.physicalDevice, *vulkanContext.surface, mWindow.getWindow(), { vulkanContext.graphicsQueueIdx, vulkanContext.presentQueueIdx });
+			createImageView(*vulkanContext.device);
+			swapchainContext = getContext();
+			
+		}
 
 		vk::SurfaceFormatKHR Swapchain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats) {
 
@@ -47,7 +53,9 @@ namespace Celer {
 				//.swapchainImageViews = &mSwapchainImageViews,
 				.swapchainExtent = &mSwapchainExtent,
 
-				.swapChainImages = &mSwapchainImages
+				.swapChainImages = &mSwapchainImages,
+
+				.swapchain = &mSwapchain
 
 			};
 		}

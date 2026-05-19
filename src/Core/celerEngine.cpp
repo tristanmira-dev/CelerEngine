@@ -7,21 +7,12 @@ namespace Celer {
 
 	namespace Core {
 
-		CelerEngine::CelerEngine() : mWindow{ "Vulkan", 1000, 800 }, mVulkanInstance{} {
-
-			/*Vulkan Instance Init*/
-			mVulkanInstance.createSurface(mWindow.createSurface(mVulkanInstance.getInstance()));
-			mVulkanInstance.pickPhysicalDevice();	
-			mVulkanInstance.createLogicalDevice();
-			mVulkanContext = mVulkanInstance.getVulkanContext();
-
-
-			/*Swapchain Init*/
-			mSwapchain.createSwapchain(*mVulkanContext.device, *mVulkanContext.physicalDevice, *mVulkanContext.surface, mWindow.getWindow(), std::array<uint32_t, 2>{mVulkanContext.graphicsQueueIdx, mVulkanContext.presentQueueIdx});
-			mSwapchain.createImageView(*mVulkanContext.device);
-			mSwapChainContext = mSwapchain.getContext();
-
-
+		CelerEngine::CelerEngine() : 
+			mWindow{ "Vulkan", 1000, 800 }, 
+			mVulkanInstance( mWindow, mVulkanContext ), 
+			mSwapchain(mVulkanContext, mSwapChainContext, mWindow) 
+		
+		{
 
 			/*Pipeline*/
 			Render::PipelineBuilder pipelineBuilder;
@@ -36,12 +27,10 @@ namespace Celer {
 
 			
 
-			/*UNIT TEST---------------------------------------------------------------------------------------------->*/
+			/*TEST, JUST PUT PIPELINE INTO A CONTAINER LATER OR SOMETHING---------------------------------------------------------------------------------------------->*/
 			mPipeline.setPipeline(pipelineBuilder, *mVulkanContext.device, *mSwapChainContext.swapchainSurfaceFormat);
-
-			mCommandBuffer = Wrapper::CommandBuffer(*mVulkanContext.device, 1, mVulkanContext.graphicsQueueIdx);
 			
-
+			mRenderer.init(mSwapChainContext, mVulkanContext);
 
 		}
 
