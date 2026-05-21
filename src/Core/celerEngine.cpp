@@ -14,6 +14,8 @@ namespace Celer {
 		
 		{
 
+			mWindow.setResizeEvent();
+
 			/*Pipeline*/
 			Render::PipelineBuilder pipelineBuilder;
 
@@ -44,7 +46,11 @@ namespace Celer {
 			while (!mWindow.shouldClose()) {
 				mWindow.pollEvents();
 
-				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline.getPipeline());
+				mWindow.setWindowUserPointer();
+
+				//if (mWindow.getResized()) std::cout << "RESIZED\n";
+
+				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline.getPipeline(), mSwapchain, mWindow);
 				
 			}
 

@@ -36,9 +36,9 @@ namespace Celer {
 				/*
 				*	Return Extent2D based on the physical device specs
 				*/
-				vk::Extent2D chooseSwapExtent(vk::SurfaceCapabilitiesKHR const& capabilities, GLFWwindow* window);
+				vk::Extent2D chooseSwapExtent(vk::SurfaceCapabilitiesKHR const& capabilities, Window& window);
 
-				
+				void cleanup();
 
 
 			public:
@@ -46,9 +46,10 @@ namespace Celer {
 				Swapchain(VulkanContext& vulkanContext, SwapchainContext& swapchainContext, Window& mWindow, uint32_t swapchainImages = 3);
 				~Swapchain() = default;
 
-				void createSwapchain(vk::raii::Device &device, vk::raii::PhysicalDevice& physicalDevice, vk::raii::SurfaceKHR& surface, GLFWwindow* window, std::array<uint32_t, 2> queueIndices);
 				void createImageView(vk::raii::Device &device);
 				SwapchainContext getContext();
+				void recreateSwapchain(VulkanContext& vulkanContext, Window& mWindow);
+				void createSwapchain(vk::raii::Device& device, vk::raii::PhysicalDevice& physicalDevice, vk::raii::SurfaceKHR& surface, Window& window, std::array<uint32_t, 2> queueIndices);
 		};
 	}
 }

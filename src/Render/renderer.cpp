@@ -2,7 +2,7 @@
 
 namespace Celer {
 	namespace Render {
-		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline &pipeline) {
+		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window) {
 
 			auto fenceResult{ vulkanCtx.device->waitForFences(*mFenceCollection[mCurrentFrameIdx], vk::True, UINT64_MAX) };
 
@@ -13,8 +13,9 @@ namespace Celer {
 			auto [result, imageIndex] = swapchainCtx.swapchain->acquireNextImage(UINT64_MAX, mPresentFinished[mCurrentFrameIdx]/*Honestly has nothing to do with present being finished(well kind of) but better name this imageProcessingSlot instead*/);
 
 			if (result == vk::Result::eErrorOutOfDateKHR) {
-				/*Resize logic here*/
-			} if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR /* this kind of dont make sense, CHECK LATER PLS*/) {
+				swapchain.recreateSwapchain(vulkanCtx, window);
+				return;
+			} else if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
 				throw std::runtime_error("Failed to get swapchain image!");
 			}
 
@@ -34,10 +35,10 @@ namespace Celer {
 
 			const vk::PresentInfoKHR presentInfoKHR{ .waitSemaphoreCount = 1, .pWaitSemaphores = &*mRenderFinished[imageIndex], .swapchainCount = 1, .pSwapchains = &(**swapchainCtx.swapchain), .pImageIndices = &imageIndex };
 			result = vulkanCtx.graphicsQueue->presentKHR(presentInfoKHR);
-			//if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || frameBufferResized) {
-			//	frameBufferResized = false;
-			//	recreateSwapChain();
-			//}
+			if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || window.getResized() ) {
+				window.resized(false);
+				swapchain.recreateSwapchain(vulkanCtx, window);
+			}
 
 
 						

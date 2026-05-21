@@ -3,6 +3,7 @@
 
 #include "contexts.hpp"
 #include "commandBuffer.hpp"
+#include "swapchain.hpp"
 
 namespace Celer {
 
@@ -23,7 +24,7 @@ namespace Celer {
 			public:
 				Renderer() = default;
 
-				void drawFrame(Core::VulkanContext& vulkanCtx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline& pipeline);
+				void drawFrame(Core::VulkanContext& vulkanCtx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline& pipeline, Core::Swapchain& swapchain, Core::Window& window);
 				void init(Core::SwapchainContext& swapchainCtx, Core::VulkanContext& vulkanCtx);
 				static constexpr uint32_t MAX_FRAMES_IN_FLIGHT{ 2 };
 

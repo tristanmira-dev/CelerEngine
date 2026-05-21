@@ -35,10 +35,33 @@ namespace Celer {
 			glfwPollEvents();
 		}
 
+		void Window::setResizeEvent() {
+		
+			glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+
+				Window* windowRef{ reinterpret_cast<Window*>(glfwGetWindowUserPointer(window)) };
+				
+				windowRef->resized(true);
+
+				windowRef->setDimen(width, height);
+
+
+			});
+		
+		}
+
+		void Window::setWindowUserPointer() {
+			glfwSetWindowUserPointer(window, this);
+		}
+
 		VkSurfaceKHR Window::createSurface(vk::raii::Instance &instance) {
 			VkSurfaceKHR surface;
 			glfwCreateWindowSurface(*instance, window, nullptr, &surface);
 			return surface;
+		}
+		void Window::getFrameBufferSize(int& width, int& height) {
+			glfwGetFramebufferSize(window, &width, &height);
+		
 		}
 	}
 }

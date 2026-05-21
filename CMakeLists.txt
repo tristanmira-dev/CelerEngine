@@ -71,6 +71,7 @@ target_sources( mainTarget PRIVATE
     ${RENDER_DIR}/renderer.cpp
     ${WRAPPER_DIR}/commandBuffer.cpp
     ${WRAPPER_DIR}/image.cpp
+    ${WRAPPER_DIR}/vulkanBuffer.cpp
 )
 
 target_sources( mainTarget PRIVATE 
@@ -86,6 +87,7 @@ target_sources( mainTarget PRIVATE
     ${RENDER_HEADER_DIR}/renderer.hpp
     ${WRAPPER_HEADER_DIR}/commandBuffer.hpp
     ${WRAPPER_HEADER_DIR}/image.hpp
+    ${WRAPPER_HEADER_DIR}/vulkanBuffer.hpp
 )
 
 #dependencies------------------------------------------------------------------------------------
