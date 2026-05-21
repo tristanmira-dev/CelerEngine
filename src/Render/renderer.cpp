@@ -10,7 +10,7 @@ namespace Celer {
 				throw std::runtime_error("Failed to wait for fence");
 			}
 
-			auto [result, imageIndex] = swapchainCtx.swapchain->acquireNextImage(UINT64_MAX, mPresentFinished[mCurrentFrameIdx]);
+			auto [result, imageIndex] = swapchainCtx.swapchain->acquireNextImage(UINT64_MAX, mPresentFinished[mCurrentFrameIdx]/*Honestly has nothing to do with present being finished(well kind of) but better name this imageProcessingSlot instead*/);
 
 			if (result == vk::Result::eErrorOutOfDateKHR) {
 				/*Resize logic here*/
@@ -45,7 +45,7 @@ namespace Celer {
 		
 		}
 		void Renderer::recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline& pipeline) {
-			vk::raii::CommandBuffer& currentCommandBuff{ mCommandBuffer.getCommandBuffer(imageIdx) };
+			vk::raii::CommandBuffer& currentCommandBuff{ mCommandBuffer.getCommandBuffer(mCurrentFrameIdx) };
 
 			auto& swapChainImg{ swapchainCtx.swapChainImages->getImage(imageIdx) };
 

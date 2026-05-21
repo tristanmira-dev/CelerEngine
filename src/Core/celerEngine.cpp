@@ -34,11 +34,18 @@ namespace Celer {
 
 		}
 
+		CelerEngine::~CelerEngine() {
+			mVulkanContext.device->waitIdle();
+		}
+
 
 		void CelerEngine::run() {
 
 			while (!mWindow.shouldClose()) {
 				mWindow.pollEvents();
+
+				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline.getPipeline());
+				
 			}
 
 		}

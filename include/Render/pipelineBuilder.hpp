@@ -40,7 +40,7 @@ namespace Celer {
 
 				/*Color Blending*/
 				vk::PipelineColorBlendStateCreateInfo mColorBlending;
-
+				vk::PipelineColorBlendAttachmentState mColorBlendAttachment;
 
 				vk::PushConstantRange mPushConstRange;
 

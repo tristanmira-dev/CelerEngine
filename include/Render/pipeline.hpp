@@ -16,7 +16,9 @@ namespace Celer {
 				
 				Pipeline() = default;
 				void setPipeline(PipelineBuilder const& pipelineBuilder, vk::raii::Device& device, vk::SurfaceFormatKHR &surfaceFormat);
-
+				inline vk::raii::Pipeline& getPipeline() {
+					return mPipeline;
+				}
 		};
 
 	}

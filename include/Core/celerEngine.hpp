@@ -38,6 +38,7 @@ namespace Celer {
 
 			public:
 				CelerEngine();
+				~CelerEngine();
 
 				void run();
 
