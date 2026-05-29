@@ -3,24 +3,33 @@
 
 #include "vulkanBuffer.hpp"
 #include "vertex.hpp"
+#include "contexts.hpp"
+#include "commandBuffer.hpp"
 
 namespace Celer {
 
 	namespace Core {
+
+
+		
+
+
 		class DeviceMemoryManager {
 			private:
-				/*Vertex Buff*/
-				uint32_t mVertexMemSize{};
-				Wrapper::Buffer mVertexBuffer;
-				std::vector<Geometry::Vertex> mVertexStagingBuffer;
+				Wrapper::BufferResource<Geometry::Vertex> mVertBuffer;
+
+				/*Queue*/
+				vk::raii::Queue& mTransferQueue;
+
+				Wrapper::CommandBuffer mCommandBuffer;
 
 			public:
 
-			
-			
+				void transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Wrapper::Buffer& src, Wrapper::Buffer& dst);
 
-				DeviceMemoryManager(Core::VulkanContext const& vulkanCtx);
+				DeviceMemoryManager(VulkanContext& vulkanCtx);
 		};
+
 	}
 
 }

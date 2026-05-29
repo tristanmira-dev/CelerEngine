@@ -23,7 +23,9 @@ namespace Celer {
 
 				void beginSingleTimeCommand();
 
-				void endSingleTimeCommand();
+				vk::raii::CommandBuffer& getSingleBuffer();
+
+				void endSingleTimeCommand(vk::raii::Queue& queue);
 
 
 		};

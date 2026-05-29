@@ -15,7 +15,7 @@ namespace Celer {
 
 			throw std::runtime_error("Fresh outta luck pal, no memory types are available for u!");
 		}
-		Buffer::Buffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const& ctx) {
+		Buffer::Buffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const& ctx) : mSize{size} {
 			vk::BufferCreateInfo bufferInfo{ .size = size, .usage = usage, .sharingMode = vk::SharingMode::eExclusive };
 			mVkBuffer = vk::raii::Buffer(*ctx.device, bufferInfo);
 

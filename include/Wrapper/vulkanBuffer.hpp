@@ -10,6 +10,8 @@ namespace Celer {
 
 			private:
 
+				vk::DeviceSize mSize;
+
 				vk::raii::Buffer mVkBuffer{ nullptr };
 				vk::raii::DeviceMemory mVkDeviceMemory{ nullptr };
 
@@ -20,7 +22,32 @@ namespace Celer {
 				Buffer() = default;
 				Buffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const &ctx);
 
+				inline vk::Buffer getBuffer() {
+					return *mVkBuffer;
+				}
+
+
+
 		};
+
+
+		/*Just a simple class for the buffer, device memory and a local buffer (CPU) to memcpy the data from*/
+		template<typename T>
+		class BufferResource {
+			private:
+				uint32_t mBufferSize{};
+				Wrapper::Buffer mBuffer;
+				std::vector<T> mStagingBuffer;
+			public:
+
+				
+				BufferResource(Core::VulkanContext vulkanCtx, uint32_t memSize) : mBufferSize{ memSize }, mBuffer(memSize,
+					vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, vulkanCtx) {
+
+				}
+		};
+
+		
 
 	}
 }
