@@ -39,10 +39,14 @@ set(RENDER_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Render)
 set(WRAPPER_DIR ${CMAKE_SOURCE_DIR}/src/Wrapper)
 set(WRAPPER_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Wrapper)
 
+#set(GEOMETRY_DIR ${CMAKE_SOURCE_DIR}/src/Geometry)
+set(GEOMETRY_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Geometry)
+
 #include directories
 target_include_directories(mainTarget PRIVATE ${CORE_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${RENDER_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${WRAPPER_HEADER_DIR})
+target_include_directories(mainTarget PRIVATE ${GEOMETRY_HEADER_DIR})
 
 #defines----------------------------------------------------------------------------------------
 target_compile_definitions(mainTarget PRIVATE VULKAN_HPP_NO_STRUCT_CONSTRUCTORS) #CPP 20 feature
@@ -55,7 +59,7 @@ target_compile_definitions(mainTarget PRIVATE NOMINMAX)
 target_include_directories(mainTarget PRIVATE ${Stb_INCLUDE_DIR})
 
 #precompiles
-target_precompile_headers(mainTarget PRIVATE <iostream> <string> <vector> <array> <cstdlib> <algorithm> <memory> <stdexcept> <vulkan/vulkan_raii.hpp> <GLFW/glfw3.h>)
+target_precompile_headers(mainTarget PRIVATE <iostream> <string> <vector> <array> <cstdlib> <algorithm> <memory> <stdexcept> <vulkan/vulkan_raii.hpp> <GLFW/glfw3.h> <glm/glm.hpp> <glm/gtc/matrix_transform.hpp>)
 
 #EXTRA SOURCES----------------------------------
 
@@ -65,6 +69,7 @@ target_sources( mainTarget PRIVATE
     ${CORE_DIR}/vulkanInstance.cpp
     ${CORE_DIR}/extensions.cpp
     ${CORE_DIR}/window.cpp
+    ${CORE_DIR}/deviceMemManager.cpp
     ${CORE_DIR}/swapchain.cpp
     ${RENDER_DIR}/pipeline.cpp
     ${RENDER_DIR}/pipelineBuilder.cpp
@@ -81,6 +86,7 @@ target_sources( mainTarget PRIVATE
     ${CORE_HEADER_DIR}/extensions.hpp
     ${CORE_HEADER_DIR}/window.hpp
     ${CORE_HEADER_DIR}/swapchain.hpp
+    ${CORE_HEADER_DIR}/deviceMemManager.hpp
     ${RENDER_HEADER_DIR}/pipeline.hpp
     ${RENDER_HEADER_DIR}/pipelineBuilder.hpp
     ${RENDER_HEADER_DIR}/render_types.hpp
@@ -88,6 +94,7 @@ target_sources( mainTarget PRIVATE
     ${WRAPPER_HEADER_DIR}/commandBuffer.hpp
     ${WRAPPER_HEADER_DIR}/image.hpp
     ${WRAPPER_HEADER_DIR}/vulkanBuffer.hpp
+    ${GEOMETRY_HEADER_DIR}/vertex.hpp
 )
 
 #dependencies------------------------------------------------------------------------------------

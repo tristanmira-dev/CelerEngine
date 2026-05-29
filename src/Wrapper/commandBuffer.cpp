@@ -16,6 +16,18 @@ namespace Celer {
 			
 		}
 
+		void CommandBuffer::beginSingleTimeCommand() {
+			mCommandBuffers[0].begin({ .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+		}
+
+		void CommandBuffer::endSingleTimeCommand() {
+			mCommandBuffers[0].end();
+
+
+
+			mCommandBuffers[0].reset();
+		}
+
 		
 
 

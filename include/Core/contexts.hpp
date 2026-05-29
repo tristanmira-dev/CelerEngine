@@ -14,9 +14,11 @@ namespace Celer {
 			vk::raii::Device* device{};
 			vk::raii::Queue* graphicsQueue{};
 			vk::raii::Queue* presentQueue{};
+			vk::raii::Queue* transferQueue{};
 
 			uint32_t graphicsQueueIdx = ~0;
 			uint32_t presentQueueIdx = ~0;
+			uint32_t transferQueueIdx = ~0;
 		};
 
 

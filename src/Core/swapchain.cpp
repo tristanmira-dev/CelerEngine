@@ -80,7 +80,7 @@ namespace Celer {
 			mSwapchainSurfaceFormat = chooseSwapSurfaceFormat(physicalDevice.getSurfaceFormatsKHR(*surface));
 			mSwapchainExtent = chooseSwapExtent(surfaceCapabilities, window);
 
-			auto minImageCount{ std::max(mSwapchainImagesCount, surfaceCapabilities.minImageCount) }; /*Minimum 3 for triple buffering*/
+			auto minImageCount{ std::max(mSwapchainImagesCount, surfaceCapabilities.minImageCount) };
 			minImageCount = (surfaceCapabilities.maxImageCount > 0 && minImageCount > surfaceCapabilities.maxImageCount) ? surfaceCapabilities.maxImageCount : minImageCount; /*maxImageCount can be 0 indicating unlimited*/
 
 			/*Create Props struct and swapchain here....*/

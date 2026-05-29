@@ -108,6 +108,28 @@ namespace Celer {
 			mDebugMessenger = mInstance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
 		}
 
+		uint32_t VulkanInstance::findTransferQueue() {
+			std::vector<vk::QueueFamilyProperties> queueFamilyProperties = mPhysicalDevice.getQueueFamilyProperties();
+			uint32_t idx{};
+			auto graphicsQueueFamilyProperty{ 
+				std::ranges::find_if(queueFamilyProperties, [this, &idx](const vk::QueueFamilyProperties& props) {
+					uint32_t isPresentCompatible{mPhysicalDevice.getSurfaceSupportKHR(idx, *mSurface)};
+					idx++;
+					return (props.queueFlags & vk::QueueFlagBits::eTransfer) != static_cast<vk::QueueFlags>(0) && (props.queueFlags & vk::QueueFlagBits::eGraphics) == static_cast<vk::QueueFlags>(0) && !isPresentCompatible;
+				}) 
+			};
+
+			if (graphicsQueueFamilyProperty == queueFamilyProperties.end()) return static_cast<uint32_t>(~0);
+
+			uint32_t transferQueue{ static_cast<uint32_t>(std::distance(queueFamilyProperties.begin(), graphicsQueueFamilyProperty) ) };
+
+			if (graphicsQueueFamilyProperty != queueFamilyProperties.end()) {
+				std::cout << "Transfer Queue found: " << transferQueue << '\n';
+			}
+
+			return transferQueue;
+		}
+
 		void VulkanInstance::pickPhysicalDevice() {
 
 			std::vector<DeviceScore> score;
@@ -215,27 +237,40 @@ namespace Celer {
 				{ .extendedDynamicState = true }
 			};
 
+			uint32_t transferIdx{ findTransferQueue() };
 
 			/*Create the device-----------------------------------------------------------------------------------------*/
 			float queuePrio{ 0.5f };
 
 			uint32_t queueSize{ presentIndex == graphicsIdx ? static_cast<uint32_t>(1) : static_cast <uint32_t>(2) };
+			if (transferIdx != static_cast<int>(~0)) ++queueSize;
+
+			std::vector<uint32_t> indexes;
+			if (presentIndex == graphicsIdx) indexes.push_back(graphicsIdx);
+			else {
+				indexes.push_back(graphicsIdx);
+				indexes.push_back(presentIndex);
+			}
+			if (transferIdx != ~0) indexes.push_back(transferIdx);
 
 			std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfoArray;
 			deviceQueueCreateInfoArray.reserve(queueSize);
 
-			deviceQueueCreateInfoArray.emplace_back( vk::DeviceQueueCreateInfo {.queueFamilyIndex = graphicsIdx, .queueCount = 1, .pQueuePriorities = &queuePrio} );
-
-			if (queueSize == 2) deviceQueueCreateInfoArray.emplace_back(vk::DeviceQueueCreateInfo{ .queueFamilyIndex = presentIndex, .queueCount = 1, .pQueuePriorities = &queuePrio });
-
+			std::for_each(indexes.begin(), indexes.end(), [&deviceQueueCreateInfoArray, &queuePrio](uint32_t idx) {
+				deviceQueueCreateInfoArray.emplace_back(vk::DeviceQueueCreateInfo{ .queueFamilyIndex = idx, .queueCount = 1, .pQueuePriorities = &queuePrio });
+			});
+			
+			
 			vk::DeviceCreateInfo deviceCreateInfo{ .pNext = &featureChain.get<vk::PhysicalDeviceFeatures2>(), .queueCreateInfoCount = queueSize, .pQueueCreateInfos = deviceQueueCreateInfoArray.data(), .enabledExtensionCount = static_cast<uint32_t>(mDeviceExtensions.size()), .ppEnabledExtensionNames = mDeviceExtensions.data()};
 
 			mGraphicsQueueIdx = graphicsIdx;
 			mPresentQueueIdx = presentIndex;
+			mTransferQueueIdx = transferIdx;
 
 			mDevice = vk::raii::Device(mPhysicalDevice, deviceCreateInfo);
 			mGraphicsQueue = vk::raii::Queue(mDevice, graphicsIdx, 0);
 			mPresentQueue = vk::raii::Queue(mDevice, presentIndex, 0);
+			mTransferQueue = vk::raii::Queue(mDevice, transferIdx, 0);
 
 		}
 
@@ -253,8 +288,10 @@ namespace Celer {
 				.device = &mDevice,
 				.graphicsQueue = &mGraphicsQueue,
 				.presentQueue = &mPresentQueue,
+				.transferQueue = &mTransferQueue,
 				.graphicsQueueIdx = mGraphicsQueueIdx,
-				.presentQueueIdx = mPresentQueueIdx
+				.presentQueueIdx = mPresentQueueIdx,
+				.transferQueueIdx = mTransferQueueIdx
 			};
 		}
 

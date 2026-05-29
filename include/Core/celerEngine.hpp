@@ -9,6 +9,7 @@
 #include "pipeline.hpp"
 #include "commandBuffer.hpp"
 #include "renderer.hpp"
+#include "deviceMemManager.hpp"
 
 
 namespace Celer {
@@ -31,6 +32,7 @@ namespace Celer {
 				Swapchain mSwapchain;
 				Render::Pipeline mPipeline; /*remove later pls*/
 				//Wrapper::CommandBuffer mCommandBuffer;
+				Core::DeviceMemoryManager mDeviceMemManager;
 
 				Render::Renderer mRenderer;
 

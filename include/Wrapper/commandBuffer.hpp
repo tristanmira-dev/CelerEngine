@@ -21,6 +21,11 @@ namespace Celer {
 					return mCommandBuffers[idx];
 				}
 
+				void beginSingleTimeCommand();
+
+				void endSingleTimeCommand();
+
+
 		};
 	
 	}
