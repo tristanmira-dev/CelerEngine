@@ -48,8 +48,8 @@ namespace Celer {
 
 		void CelerEngine::run() {
 
-			Wrapper::Buffer buffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, mVulkanContext);
-			
+			//Wrapper::Buffer buffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, mVulkanContext);
+			//
 			while (!mWindow.shouldClose()) {
 				mWindow.pollEvents();
 

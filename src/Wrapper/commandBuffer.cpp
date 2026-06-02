@@ -29,6 +29,7 @@ namespace Celer {
 
 			queue.submit(vk::SubmitInfo{ .commandBufferCount = 1, .pCommandBuffers = &**mCommandBuffers.begin() /*holy this monstrosity*/ });
 
+			queue.waitIdle();
 			mCommandBuffers[0].reset();
 		}
 
