@@ -10,7 +10,7 @@
 #include "commandBuffer.hpp"
 #include "renderer.hpp"
 #include "deviceMemManager.hpp"
-
+#include "mesh.hpp"
 
 namespace Celer {
 
@@ -35,6 +35,8 @@ namespace Celer {
 				Core::DeviceMemoryManager mDeviceMemManager;
 
 				Render::Renderer mRenderer;
+
+				Geometry::MeshManager mMeshManager;
 
 				/*Private Functions*/
 

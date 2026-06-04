@@ -1,8 +1,5 @@
 #include "celerEngine.hpp"
-#include <algorithm>
-#include <vector>
-#include <stdexcept>
-#include "vulkanBuffer.hpp"
+#include "mesh.hpp"
 
 namespace Celer {
 
@@ -12,8 +9,8 @@ namespace Celer {
 			mWindow{ "Vulkan", 1000, 800 }, 
 			mVulkanInstance( mWindow, mVulkanContext ), 
 			mSwapchain(mVulkanContext, mSwapChainContext, mWindow),
-			mDeviceMemManager(mVulkanContext)
-		
+			mDeviceMemManager(mVulkanContext),
+			mMeshManager(mDeviceMemManager)
 		{
 
 			mWindow.setResizeEvent();
@@ -50,6 +47,14 @@ namespace Celer {
 
 			//Wrapper::Buffer buffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, mVulkanContext);
 			//
+			mMeshManager.addMesh({ {
+				glm::vec3(100.f, 0.f, 0.f),
+				glm::vec3(1.f, 1.f, 1.f),
+				glm::vec2(1.f, 0.f)
+			} });
+
+			
+
 			while (!mWindow.shouldClose()) {
 				mWindow.pollEvents();
 

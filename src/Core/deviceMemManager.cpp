@@ -44,10 +44,10 @@ namespace Celer {
 
 
 			
-			allocateMemory(4);
+			//allocateMemory(4);
 
-			std::vector<Geometry::Vertex> test{{{1.f, 1.f, 1.f}, { 1.f, 1.f, 1.f }, { 1.f, 1.f }}, };
-			addToDeviceBuffer(test);
+			//std::vector<Geometry::Vertex> test{{{1.f, 1.f, 1.f}, { 1.f, 1.f, 1.f }, { 1.f, 1.f }}, };
+			//addToDeviceBuffer(test);
 
 
 

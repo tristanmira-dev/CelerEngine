@@ -19,6 +19,7 @@ namespace Celer {
 				bool mIsFree{ true };
 
 			public:
+				Memory() = default;
 				Memory(uint32_t offset, uint32_t size, bool isFree) : mOffset{ offset }, mSize{ size }, mIsFree{ isFree } {}
 
 				inline uint32_t getSize() {

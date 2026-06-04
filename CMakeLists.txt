@@ -41,6 +41,7 @@ set(WRAPPER_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Wrapper)
 
 #set(GEOMETRY_DIR ${CMAKE_SOURCE_DIR}/src/Geometry)
 set(GEOMETRY_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Geometry)
+set(GEOMETRY_DIR ${CMAKE_SOURCE_DIR}/src/Geometry)
 
 #include directories
 target_include_directories(mainTarget PRIVATE ${CORE_HEADER_DIR})
@@ -59,7 +60,7 @@ target_compile_definitions(mainTarget PRIVATE NOMINMAX)
 target_include_directories(mainTarget PRIVATE ${Stb_INCLUDE_DIR})
 
 #precompiles
-target_precompile_headers(mainTarget PRIVATE <iostream> <string> <vector> <array> <cstdlib> <algorithm> <memory> <stdexcept> <vulkan/vulkan_raii.hpp> <GLFW/glfw3.h> <glm/glm.hpp> <glm/gtc/matrix_transform.hpp>)
+target_precompile_headers(mainTarget PRIVATE <iostream> <string> <vector> <array> <cstdlib> <algorithm> <memory> <stdexcept> <vulkan/vulkan_raii.hpp> <GLFW/glfw3.h> <glm/glm.hpp> <glm/gtc/matrix_transform.hpp> <initializer_list>)
 
 #EXTRA SOURCES----------------------------------
 
@@ -77,6 +78,7 @@ target_sources( mainTarget PRIVATE
     ${WRAPPER_DIR}/commandBuffer.cpp
     ${WRAPPER_DIR}/image.cpp
     ${WRAPPER_DIR}/vulkanBuffer.cpp
+    ${GEOMETRY_DIR}/mesh.cpp
 )
 
 target_sources( mainTarget PRIVATE 
@@ -95,6 +97,7 @@ target_sources( mainTarget PRIVATE
     ${WRAPPER_HEADER_DIR}/image.hpp
     ${WRAPPER_HEADER_DIR}/vulkanBuffer.hpp
     ${GEOMETRY_HEADER_DIR}/vertex.hpp
+    ${GEOMETRY_HEADER_DIR}/mesh.hpp
 )
 
 #dependencies------------------------------------------------------------------------------------
