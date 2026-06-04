@@ -3,8 +3,9 @@
 
 namespace Celer {
 	namespace Geometry {
-
-		
+		vk::Buffer MeshManager::getUnderlyingBuffer() {
+			return mMemManager.getMainBuffer();
+		}
 		MeshManager::MeshManager(Core::DeviceMemoryManager& memManager) : mMemManager{ memManager } {
 			mAllocatedGPUMem = mMemManager.allocateMemory(1024 * 1024 * 100);
 		}
@@ -14,9 +15,9 @@ namespace Celer {
 			//mLocalVerticesData.push_back(Vertex{ glm::vec3{1.f, 1.f, 1.f}, glm::vec3{0.f,0.f,0.f}, glm::vec2{1.f, 1.f} });
 		}
 
-		void MeshManager::submitMesh() {
+		void MeshManager::submitMesh(Core::VulkanContext& vulkanCtx) {
 			mMemManager.addToDeviceBuffer(mLocalVerticesData);
-
+			mMemManager.transferMemoryToLocalBuffer(vulkanCtx, mAllocatedGPUMem, getSizeOfLocalInBytes());
 		}
 
 

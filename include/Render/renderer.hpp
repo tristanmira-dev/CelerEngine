@@ -4,6 +4,7 @@
 #include "contexts.hpp"
 #include "commandBuffer.hpp"
 #include "swapchain.hpp"
+#include "mesh.hpp"
 
 namespace Celer {
 
@@ -12,7 +13,7 @@ namespace Celer {
 		class Renderer {
 			private:
 				uint32_t mCurrentFrameIdx{};
-				void recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline& pipeline);
+				void recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline& pipeline, Geometry::MeshManager &meshManager);
 
 
 				Wrapper::CommandBuffer mCommandBuffer;
@@ -24,7 +25,7 @@ namespace Celer {
 			public:
 				Renderer() = default;
 
-				void drawFrame(Core::VulkanContext& vulkanCtx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline& pipeline, Core::Swapchain& swapchain, Core::Window& window);
+				void drawFrame(Core::VulkanContext& vulkanCtx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline& pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager& meshManager, Core::DeviceMemoryManager& memManager);
 				void init(Core::SwapchainContext& swapchainCtx, Core::VulkanContext& vulkanCtx);
 				static constexpr uint32_t MAX_FRAMES_IN_FLIGHT{ 2 };
 

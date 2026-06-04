@@ -73,12 +73,19 @@ namespace Celer {
 				throw std::runtime_error{ *requiredExtIT };
 			}
 
+			/*SYNC FEATURES FOR A VALIDATION LAYER*/
+			std::vector<vk::ValidationFeatureEnableEXT> validationLayerFeatureEnabled{ vk::ValidationFeatureEnableEXT::eSynchronizationValidation };
+
+			vk::ValidationFeaturesEXT validationFeatures{ .enabledValidationFeatureCount = static_cast<uint32_t>(validationLayerFeatureEnabled.size()), .pEnabledValidationFeatures = validationLayerFeatureEnabled.data()};
+			
+
 			vk::InstanceCreateInfo createInfo{
+				.pNext = mEnableValidationLayers ? &validationFeatures : nullptr,
 				.pApplicationInfo = &appInfo,
 				.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
 				.ppEnabledLayerNames = requiredLayers.data(),
 				.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size()),
-				.ppEnabledExtensionNames = requiredExtensions.data()
+				.ppEnabledExtensionNames = requiredExtensions.data(),
 			};
 
 			mInstance = vk::raii::Instance{ mContext, createInfo };

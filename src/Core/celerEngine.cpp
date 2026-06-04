@@ -47,11 +47,29 @@ namespace Celer {
 
 			//Wrapper::Buffer buffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, mVulkanContext);
 			//
-			mMeshManager.addMesh({ {
-				glm::vec3(100.f, 0.f, 0.f),
-				glm::vec3(1.f, 1.f, 1.f),
-				glm::vec2(1.f, 0.f)
-			} });
+
+			//float2(0.0, -0.5),
+			//	float2(0.5, 0.5),
+			//	float2(-0.5, 0.5)
+			mMeshManager.addMesh({ 
+				{
+					glm::vec3(0.f, -0.5f, 0.f),
+					glm::vec3(1.f, 0.f, 0.f),
+					//glm::vec2(1.f, 0.f)
+				},
+				{
+					glm::vec3(0.5f, 0.5f, 0.f),
+					glm::vec3(0.f, 1.f, 0.f),
+					//glm::vec2(1.f, 0.f)
+				},
+				{
+					glm::vec3(-0.5f, 0.5f, 0.f),
+					glm::vec3(0.f, 0.f, 1.f),
+					//glm::vec2(1.f, 0.f)
+				}
+			});
+
+			mMeshManager.submitMesh(mVulkanContext);
 
 			
 
@@ -62,7 +80,7 @@ namespace Celer {
 
 				//if (mWindow.getResized()) std::cout << "RESIZED\n";
 
-				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline.getPipeline(), mSwapchain, mWindow);
+				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline.getPipeline(), mSwapchain, mWindow, mMeshManager, mDeviceMemManager);
 				
 			}
 

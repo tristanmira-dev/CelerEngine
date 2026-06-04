@@ -25,7 +25,7 @@ namespace Celer {
 
 				vk::raii::CommandBuffer& getSingleBuffer();
 
-				void endSingleTimeCommand(vk::raii::Queue& queue);
+				void endSingleTimeCommand(vk::raii::Queue& queue, vk::raii::Semaphore* semaphore = nullptr);
 
 
 		};

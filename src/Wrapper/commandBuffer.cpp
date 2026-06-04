@@ -24,10 +24,16 @@ namespace Celer {
 			return *mCommandBuffers.begin();
 		}
 
-		void CommandBuffer::endSingleTimeCommand(vk::raii::Queue& queue) {
+		void CommandBuffer::endSingleTimeCommand(vk::raii::Queue& queue, vk::raii::Semaphore* semaphore) {
 			mCommandBuffers[0].end();
 
-			queue.submit(vk::SubmitInfo{ .commandBufferCount = 1, .pCommandBuffers = &**mCommandBuffers.begin() /*holy this monstrosity*/ });
+			vk::SubmitInfo submitInfo{ .commandBufferCount = 1, .pCommandBuffers = &**mCommandBuffers.begin() /*holy this monstrosity*/ };
+
+
+
+			if (semaphore) submitInfo.pSignalSemaphores = &(**semaphore);
+
+			queue.submit(submitInfo);
 
 			queue.waitIdle();
 			mCommandBuffers[0].reset();

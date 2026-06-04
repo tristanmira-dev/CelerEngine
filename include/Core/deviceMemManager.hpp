@@ -22,11 +22,11 @@ namespace Celer {
 				Memory() = default;
 				Memory(uint32_t offset, uint32_t size, bool isFree) : mOffset{ offset }, mSize{ size }, mIsFree{ isFree } {}
 
-				inline uint32_t getSize() {
+				inline uint32_t getSize() const {
 					return mSize;
 				}
 
-				inline uint32_t getOffset() {
+				inline uint32_t getOffset() const {
 					return mOffset;
 				}
 		};
@@ -44,13 +44,26 @@ namespace Celer {
 
 				/*Queue*/
 				vk::raii::Queue& mTransferQueue;
+				uint32_t mTransferQueueIdx;
+
 				Wrapper::CommandBuffer mCommandBuffer;
 
+				vk::raii::Semaphore mTransferFinished{ nullptr };
 
 
 			public:
 
-				void transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Wrapper::Buffer& src, Wrapper::Buffer& dst, vk::DeviceSize size);
+				inline uint32_t getMainBuffOwner() {
+					return mMainBuffer.getQueueOwner();
+				}
+
+				void mainBuffAcquireQueueOwnership(Wrapper::CommandBuffer& commandBuffer, uint32_t oldOwnerIdx, uint32_t newOwnerIdx, vk::raii::Queue& queue);
+
+				inline vk::Buffer getMainBuffer() {
+					return mMainBuffer.getBuffer();
+				}
+
+				void transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize);
 
 				Memory allocateMemory(uint32_t size);
 

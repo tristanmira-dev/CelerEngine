@@ -39,9 +39,17 @@ namespace Celer {
 				}
 
 				inline vk::DeviceSize getSize() const {
-
 					return mSize;
 				}
+
+				inline uint32_t getQueueOwner() {
+					return mQueueOwner;
+				}
+
+				inline void setQueueOwner(uint32_t newOwner) {
+					mQueueOwner = newOwner;
+				}
+
 
 
 

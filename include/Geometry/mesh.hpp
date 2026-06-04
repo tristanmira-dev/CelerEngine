@@ -14,9 +14,21 @@ namespace Celer {
 				Core::Memory mAllocatedGPUMem;
 
 			public:
+				vk::Buffer getUnderlyingBuffer();
 				MeshManager(Core::DeviceMemoryManager& memManager);
 				void addMesh(std::initializer_list<Vertex>&& initList);
-				void submitMesh();
+				void submitMesh(Core::VulkanContext& vulkanCtx);
+				inline uint32_t getVertexCount() {
+					return mLocalVerticesData.size();
+				}
+
+				inline uint32_t getSizeOfLocalInBytes() {
+					return mLocalVerticesData.size() * sizeof(*mLocalVerticesData.begin());
+				}
+
+				inline Core::Memory getMemoryInfo() {
+					return mAllocatedGPUMem;
+				}
 
 		};
 

@@ -1,5 +1,7 @@
 #include "pipelineBuilder.hpp"
+#include "vertex.hpp"
 #include <fstream>
+
 
 namespace {
 
@@ -15,8 +17,14 @@ namespace Celer {
 			mDynamicStates = std::vector<vk::DynamicState>{ vk::DynamicState::eViewport, vk::DynamicState::eScissor }; //This will cause the configuration of these values to be ignored, and you will be able (and required) to specify the data at drawing time
 			mDynamicState = vk::PipelineDynamicStateCreateInfo { .dynamicStateCount = static_cast<uint32_t>(mDynamicStates.size()), .pDynamicStates = mDynamicStates.data() };
 			
+			auto attributeDesc{ Geometry::Vertex::getAttributeDescription() };
+			mVertexAttrDesc.resize(attributeDesc.size());
+			std::copy(attributeDesc.begin(), attributeDesc.end(), mVertexAttrDesc.begin());
+
+			mVertexBindingDesc = Geometry::Vertex::getBindingDescription();
+
 			/*Vertex input*/
-			mVertexInputInfo = vk::PipelineVertexInputStateCreateInfo{};
+			mVertexInputInfo = vk::PipelineVertexInputStateCreateInfo{.vertexBindingDescriptionCount = 1, .pVertexBindingDescriptions = &mVertexBindingDesc, .vertexAttributeDescriptionCount = static_cast<uint32_t>(mVertexAttrDesc.size()), .pVertexAttributeDescriptions = mVertexAttrDesc.data() };
 
 			/*Input Assembly(Type of geometry to draw)*/
 			mInputAssemblyInfo = vk::PipelineInputAssemblyStateCreateInfo{ .topology = vk::PrimitiveTopology::eTriangleList };
@@ -57,6 +65,10 @@ namespace Celer {
 		void PipelineBuilder::createShader(std::string const& path, vk::raii::Device& device) {
 		
 			mShaderModule = createShaderModule(readFile(path), device);
+
+		}
+
+		void PipelineBuilder::addVertexBufferInfo() {
 
 		}
 
