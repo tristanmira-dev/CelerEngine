@@ -24,19 +24,37 @@ namespace Celer {
 			return *mCommandBuffers.begin();
 		}
 
+		void CommandBuffer::endSyncCommand(vk::raii::Queue& queue, uint32_t commandBufferIdx, vk::raii::Semaphore* signalSemaphore, vk::raii::Semaphore* waitSemaphore, vk::PipelineStageFlags pipelineStage, vk::raii::Fence *fence) {
+
+			mCommandBuffers[commandBufferIdx].end();
+
+			vk::SubmitInfo submit{ .commandBufferCount = 1, .pCommandBuffers = &*mCommandBuffers[commandBufferIdx] };
+
+			if (signalSemaphore) {
+				submit.pSignalSemaphores = &(**signalSemaphore);
+				submit.signalSemaphoreCount = 1;
+			}
+
+			if (waitSemaphore) {
+				submit.pWaitSemaphores = &(**waitSemaphore);
+				submit.waitSemaphoreCount = 1;
+				submit.pWaitDstStageMask = &pipelineStage;
+			}
+
+			if (fence) queue.submit(submit, **fence);
+			else queue.submit(submit);
+		
+
+		}
+
 		void CommandBuffer::endSingleTimeCommand(vk::raii::Queue& queue, vk::raii::Semaphore* semaphore) {
 			mCommandBuffers[0].end();
 
 			vk::SubmitInfo submitInfo{ .commandBufferCount = 1, .pCommandBuffers = &**mCommandBuffers.begin() /*holy this monstrosity*/ };
 
-
-
-			if (semaphore) submitInfo.pSignalSemaphores = &(**semaphore);
-
 			queue.submit(submitInfo);
 
-			queue.waitIdle();
-			mCommandBuffers[0].reset();
+			//mCommandBuffers[0].reset();
 		}
 
 		

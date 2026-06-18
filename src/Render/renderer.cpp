@@ -4,11 +4,6 @@ namespace Celer {
 	namespace Render {
 		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager &meshManager, Core::DeviceMemoryManager& memManager) {
 
-			/*TODO, well you already know why... maybe set up semaphores and fences for this*/
-			if (memManager.getMainBuffOwner() != vulkanCtx.graphicsQueueIdx) {
-				memManager.mainBuffAcquireQueueOwnership(mCommandBuffer, memManager.getMainBuffOwner(), vulkanCtx.graphicsQueueIdx, *vulkanCtx.graphicsQueue);
-			}
-
 			auto fenceResult{ vulkanCtx.device->waitForFences(*mFenceCollection[mCurrentFrameIdx], vk::True, UINT64_MAX) };
 
 			if (fenceResult != vk::Result::eSuccess) {
@@ -24,12 +19,21 @@ namespace Celer {
 				throw std::runtime_error("Failed to get swapchain image!");
 			}
 
+
 			mCommandBuffer.getCommandBuffer(mCurrentFrameIdx).reset();
 
 
 			vulkanCtx.device->resetFences(*mFenceCollection[mCurrentFrameIdx]);
 
 			//updateUniformBuffer(frameIdx);
+
+			/*TODO, well you already know why... maybe set up semaphores and fences for this*/
+			if (memManager.getMainBuffOwner() != vulkanCtx.graphicsQueueIdx) {
+				memManager.mainBuffAcquireQueueOwnership(mCommandBuffer, mCurrentFrameIdx, memManager.getMainBuffOwner(), vulkanCtx.graphicsQueueIdx, *vulkanCtx.graphicsQueue, mTransferFence);
+				vulkanCtx.device->waitForFences(*mTransferFence, vk::True, UINT64_MAX);
+				vulkanCtx.device->resetFences(*mTransferFence);
+				mCommandBuffer.getCommandBuffer(mCurrentFrameIdx).reset();
+			}
 
 			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager);
 
@@ -168,6 +172,8 @@ namespace Celer {
 		void Renderer::init(Core::SwapchainContext& swapchainCtx, Core::VulkanContext& vulkanCtx) {
 		
 			mCommandBuffer = Wrapper::CommandBuffer(*vulkanCtx.device, MAX_FRAMES_IN_FLIGHT, vulkanCtx.graphicsQueueIdx);
+
+			mTransferFence = vk::raii::Fence(*vulkanCtx.device, vk::FenceCreateInfo{ });
 
 			std::size_t size{ swapchainCtx.swapChainImages->getSize() };
 

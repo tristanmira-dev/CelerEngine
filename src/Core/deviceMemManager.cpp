@@ -13,6 +13,11 @@ namespace Celer {
 
 		void DeviceMemoryManager::transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize) {
 
+			vulkanCtx.device->waitForFences(*mTransferFence, vk::True, UINT64_MAX);
+			vulkanCtx.device->resetFences(*mTransferFence);
+
+			mCommandBuffer.getSingleBuffer().reset();
+
 			uint32_t mainBuffCurrentOwner{ mMainBuffer.getQueueOwner() };
 
 			if (mainBuffCurrentOwner == mTransferQueueIdx) {
@@ -30,7 +35,7 @@ namespace Celer {
 
 				mCommandBuffer.getSingleBuffer().pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, {}, {}, release, {});
 
-				mCommandBuffer.endSingleTimeCommand(mTransferQueue, &mTransferFinished);
+				mCommandBuffer.endSyncCommand(mTransferQueue, 0, &mTransferFinished, nullptr, vk::PipelineStageFlagBits::eTopOfPipe, &mTransferFence);
 
 			} else {
 
@@ -39,10 +44,10 @@ namespace Celer {
 			
 		}
 
-		void DeviceMemoryManager::mainBuffAcquireQueueOwnership(Wrapper::CommandBuffer& commandBuffer, uint32_t oldOwnerIdx, uint32_t newOwnerIdx, vk::raii::Queue &queue) {
-			commandBuffer.beginSingleTimeCommand();
+		void DeviceMemoryManager::mainBuffAcquireQueueOwnership(Wrapper::CommandBuffer& commandBuffer, uint32_t commandBufferIdx, uint32_t oldOwnerIdx, uint32_t newOwnerIdx, vk::raii::Queue &queue, vk::raii::Fence &fence) {
+			commandBuffer.getCommandBuffer(commandBufferIdx).begin({});
 
-			commandBuffer.getSingleBuffer().pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eVertexInput, {}, {}, vk::BufferMemoryBarrier {
+			commandBuffer.getCommandBuffer(commandBufferIdx).pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eVertexInput, {}, {}, vk::BufferMemoryBarrier{
 				.srcAccessMask = vk::AccessFlagBits::eNone,
 				.dstAccessMask = vk::AccessFlagBits::eVertexAttributeRead,
 				.srcQueueFamilyIndex = oldOwnerIdx,
@@ -53,7 +58,7 @@ namespace Celer {
 				
 			}, {});
 
-			commandBuffer.endSingleTimeCommand(queue);
+			commandBuffer.endSyncCommand(queue, commandBufferIdx, nullptr, &mTransferFinished, vk::PipelineStageFlagBits::eVertexInput, &fence);
 
 			mMainBuffer.setQueueOwner(newOwnerIdx);
 		}
@@ -85,6 +90,8 @@ namespace Celer {
 		{
 			mMainBuffer.setQueueOwner(mTransferQueueIdx);
 			mStagingBuffer.setQueueOwner(mTransferQueueIdx);
+
+			mTransferFence = vk::raii::Fence(*vulkanCtx.device, vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
 
 			mTransferFinished = vk::raii::Semaphore(*vulkanCtx.device, vk::SemaphoreCreateInfo{});
 

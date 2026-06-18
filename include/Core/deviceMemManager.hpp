@@ -34,6 +34,11 @@ namespace Celer {
 
 		class DeviceMemoryManager {
 			private:
+
+
+
+				vk::raii::Fence mTransferFence{ nullptr };
+
 				uint32_t mMainBufferSize;
 
 				Wrapper::Buffer mMainBuffer;
@@ -57,7 +62,7 @@ namespace Celer {
 					return mMainBuffer.getQueueOwner();
 				}
 
-				void mainBuffAcquireQueueOwnership(Wrapper::CommandBuffer& commandBuffer, uint32_t oldOwnerIdx, uint32_t newOwnerIdx, vk::raii::Queue& queue);
+				void mainBuffAcquireQueueOwnership(Wrapper::CommandBuffer& commandBuffer, uint32_t commandBufferIdx, uint32_t oldOwnerIdx, uint32_t newOwnerIdx, vk::raii::Queue& queue, vk::raii::Fence& fence);
 
 				inline vk::Buffer getMainBuffer() {
 					return mMainBuffer.getBuffer();

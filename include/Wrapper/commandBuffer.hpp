@@ -25,6 +25,7 @@ namespace Celer {
 
 				vk::raii::CommandBuffer& getSingleBuffer();
 
+				void endSyncCommand(vk::raii::Queue& queue, uint32_t commandBufferIdx, vk::raii::Semaphore* signalSemaphore = nullptr, vk::raii::Semaphore* waitSemaphore = nullptr, vk::PipelineStageFlags pipelineStage = vk::PipelineStageFlagBits::eTopOfPipe, vk::raii::Fence *fence = nullptr);
 				void endSingleTimeCommand(vk::raii::Queue& queue, vk::raii::Semaphore* semaphore = nullptr);
 
 

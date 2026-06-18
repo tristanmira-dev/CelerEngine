@@ -17,6 +17,8 @@ namespace Celer {
 
 
 				Wrapper::CommandBuffer mCommandBuffer;
+
+				vk::raii::Fence mTransferFence{ nullptr };
 				std::vector<vk::raii::Fence> mFenceCollection;
 				std::vector<vk::raii::Semaphore> mRenderFinished;
 				std::vector<vk::raii::Semaphore> mPresentFinished;
