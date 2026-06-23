@@ -122,7 +122,7 @@ namespace Celer {
 			currentCommandBuff.beginRendering(renderingInfo);
 
 			currentCommandBuff.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
-			currentCommandBuff.bindVertexBuffers(0, meshManager.getUnderlyingBuffer(), {meshManager.getMemoryInfo().getOffset()});
+			currentCommandBuff.bindVertexBuffers(0, meshManager.getUnderlyingBuffer(), {meshManager.getVertexMemoryInfo().getOffset()});
 
 
 			//currentCommandBuff.bindVertexBuffers(0, *vertexBuffer, { 0 });

@@ -44,6 +44,14 @@ namespace Celer {
 			
 		}
 
+		uint32_t DeviceMemoryManager::getAlignedOffset(uint32_t bytes, uint32_t alignTo) {
+		
+			while (bytes % alignTo != 0) ++bytes;
+
+			return bytes;
+		
+		}
+
 		void DeviceMemoryManager::mainBuffAcquireQueueOwnership(Wrapper::CommandBuffer& commandBuffer, uint32_t commandBufferIdx, uint32_t oldOwnerIdx, uint32_t newOwnerIdx, vk::raii::Queue &queue, vk::raii::Fence &fence) {
 			commandBuffer.getCommandBuffer(commandBufferIdx).begin({});
 
@@ -63,24 +71,9 @@ namespace Celer {
 			mMainBuffer.setQueueOwner(newOwnerIdx);
 		}
 
-		Memory DeviceMemoryManager::allocateMemory(uint32_t size) {
-
-			if (mMemoryTracker.size() == 0) {
-				mMemoryTracker.push_back(Memory{ 0, size, false });
-				return mMemoryTracker.back();
-
-			}
-
-			Memory backIter{ mMemoryTracker.back() };
-
-			mMemoryTracker.push_back(Memory{ backIter.getOffset() + backIter.getSize(), size, false });
-			return mMemoryTracker.back();
-
-		}
-
 		DeviceMemoryManager::DeviceMemoryManager(Core::VulkanContext& vulkanCtx) :
 			mMainBufferSize{ 1024 * 1024 * 500 },
-			mMainBuffer(Wrapper::Buffer::createDeviceLocalBuffer(mMainBufferSize, vulkanCtx, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eIndexBuffer)),
+			mMainBuffer(Wrapper::Buffer::createDeviceLocalBuffer(mMainBufferSize, vulkanCtx, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eUniformBuffer)),
 			mMappedStagingBuff{ mStagingBuffer.mapMemory() },
 			mStagingBuffer(1024 * 1024 * 64, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx),
 			mTransferQueue{ *vulkanCtx.transferQueue },

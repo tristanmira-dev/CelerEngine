@@ -51,7 +51,7 @@ namespace Celer {
 			//float2(0.0, -0.5),
 			//	float2(0.5, 0.5),
 			//	float2(-0.5, 0.5)
-			mMeshManager.addMesh({ 
+			mMeshManager.addVertices({ 
 				{
 					glm::vec3(0.f, -0.5f, 0.f),
 					glm::vec3(1.f, 0.f, 0.f),

@@ -58,6 +58,8 @@ namespace Celer {
 
 			public:
 
+				uint32_t getAlignedOffset(uint32_t bytes, uint32_t alignTo);
+
 				inline uint32_t getMainBuffOwner() {
 					return mMainBuffer.getQueueOwner();
 				}
@@ -70,7 +72,21 @@ namespace Celer {
 
 				void transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize);
 
-				Memory allocateMemory(uint32_t size);
+				template<typename T>
+				Memory allocateMemory(uint32_t size) {
+
+					if (mMemoryTracker.size() == 0) {
+						mMemoryTracker.push_back(Memory{ 0, size, false });
+						return mMemoryTracker.back();
+
+					}
+
+					Memory backIter{ mMemoryTracker.back() };
+
+					mMemoryTracker.push_back(Memory{ getAlignedOffset(backIter.getOffset() + backIter.getSize(), alignof(T)), size, false });
+					return mMemoryTracker.back();
+
+				}
 
 				template<typename Iterable>
 				void addToDeviceBuffer(Iterable& container) {
