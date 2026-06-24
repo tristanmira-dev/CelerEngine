@@ -10,6 +10,39 @@ namespace Celer {
 
 		//}
 
+		void DeviceMemoryManager::transferOwnership(VulkanContext &vulkanCtx, uint32_t oldQueueIdx, uint32_t newQueueIdx) {
+
+			vulkanCtx.device->waitForFences(*mTransferFence, vk::True, UINT64_MAX);
+			vulkanCtx.device->resetFences(*mTransferFence);
+
+			mCommandBuffer.getSingleBuffer().reset();
+
+			uint32_t mainBuffCurrentOwner{ mMainBuffer.getQueueOwner() };
+			
+
+			if (mainBuffCurrentOwner == newQueueIdx) return;
+
+			mMainBuffer.setQueueOwner(newQueueIdx);
+
+			mCommandBuffer.beginSingleTimeCommand();
+			vk::BufferMemoryBarrier release{
+					.srcAccessMask = vk::AccessFlagBits::eTransferWrite,
+					.dstAccessMask = vk::AccessFlagBits::eNone,
+					.srcQueueFamilyIndex = mTransferQueueIdx,
+					.dstQueueFamilyIndex = vulkanCtx.graphicsQueueIdx,
+					.buffer = mMainBuffer.getBuffer(),
+					.offset = 0,
+					.size = mMainBuffer.getSize()
+			};
+
+			mCommandBuffer.getSingleBuffer().pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, {}, {}, release, {});
+
+			mCommandBuffer.endSyncCommand(mTransferQueue, 0, nullptr, &mTransferFinished, vk::PipelineStageFlagBits::eBottomOfPipe);
+
+
+
+		}
+
 
 		void DeviceMemoryManager::transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize) {
 
@@ -32,8 +65,6 @@ namespace Celer {
 					.offset = 0,
 					.size = mMainBuffer.getSize()
 				};
-
-				mCommandBuffer.getSingleBuffer().pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eBottomOfPipe, {}, {}, release, {});
 
 				mCommandBuffer.endSyncCommand(mTransferQueue, 0, &mTransferFinished, nullptr, vk::PipelineStageFlagBits::eTopOfPipe, &mTransferFence);
 

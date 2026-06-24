@@ -20,6 +20,7 @@ namespace Celer {
 				MeshManager(Core::DeviceMemoryManager& memManager);
 				void addVertices(std::initializer_list<Vertex>&& initList);
 				void submitMesh(Core::VulkanContext& vulkanCtx);
+				void submitIndices(Core::VulkanContext& vulkanCtx);
 				inline uint32_t getVertexCount() {
 					return mLocalVerticesData.size();
 				}

@@ -58,6 +58,8 @@ namespace Celer {
 
 			public:
 
+				void transferOwnership(VulkanContext& vulkanCtx, uint32_t oldQueueIdx, uint32_t newQueueIdx);
+
 				uint32_t getAlignedOffset(uint32_t bytes, uint32_t alignTo);
 
 				inline uint32_t getMainBuffOwner() {

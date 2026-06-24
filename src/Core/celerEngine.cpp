@@ -71,6 +71,8 @@ namespace Celer {
 
 			mMeshManager.submitMesh(mVulkanContext);
 
+			mDeviceMemManager.transferOwnership(mVulkanContext, mVulkanContext.transferQueueIdx, mVulkanContext.graphicsQueueIdx);
+
 			
 
 			while (!mWindow.shouldClose()) {
