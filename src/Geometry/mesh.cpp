@@ -22,9 +22,16 @@ namespace Celer {
 		}
 
 
-		void MeshManager::submitMesh(Core::VulkanContext& vulkanCtx) {
-			mMemManager.addToDeviceBuffer(mLocalVerticesData);
-			mMemManager.transferMemoryToLocalBuffer(vulkanCtx, mAllocatedVertexMem, getSizeOfLocalInBytes());
+		void MeshManager::submitMesh(Core::VulkanContext& vulkanCtx, bool endOfBatch) {
+			mMemManager.addToDeviceBuffer(mLocalVerticesData, vulkanCtx);
+			mMemManager.transferMemoryToLocalBuffer(vulkanCtx, mAllocatedVertexMem, getSizeOfLocalInBytes(mLocalVerticesData), endOfBatch);
+		}
+
+
+		void MeshManager::submitIndices(Core::VulkanContext& vulkanCtx, bool endOfBatch) {
+			mMemManager.addToDeviceBuffer(mLocalIndexData, vulkanCtx);
+			mMemManager.transferMemoryToLocalBuffer(vulkanCtx, mAllocatedIndicesMem, getSizeOfLocalInBytes(mLocalIndexData), endOfBatch);
+
 		}
 
 

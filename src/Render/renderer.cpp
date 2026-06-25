@@ -123,7 +123,7 @@ namespace Celer {
 
 			currentCommandBuff.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 			currentCommandBuff.bindVertexBuffers(0, meshManager.getUnderlyingBuffer(), {meshManager.getVertexMemoryInfo().getOffset()});
-
+			currentCommandBuff.bindIndexBuffer(meshManager.getUnderlyingBuffer(), { meshManager.getIndicesMemoryInfo().getOffset() }, vk::IndexType::eUint32);
 
 			//currentCommandBuff.bindVertexBuffers(0, *vertexBuffer, { 0 });
 			//currentCommandBuff.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, *descriptorSets[frameIdx], nullptr);
@@ -139,7 +139,8 @@ namespace Celer {
 			//	currentCommandBuff.drawIndexed(gameObjects.verticesInformation[gameObjects.meshIdx[i]].totalIndices, 1, gameObjects.verticesInformation[gameObjects.meshIdx[i]].start - gameObjects.indices.begin(), 0, 0);
 			//}
 
-			currentCommandBuff.draw(meshManager.getVertexCount(), 1, 0, 0);
+			//currentCommandBuff.draw(meshManager.getVertexCount(), 1, 0, 0);
+			currentCommandBuff.drawIndexed(meshManager.getIndicesCount(), 1, 0, 0, 0);
 
 
 			currentCommandBuff.endRendering();

@@ -69,11 +69,16 @@ namespace Celer {
 				}
 			});
 
-			mMeshManager.submitMesh(mVulkanContext);
+
+			mMeshManager.submitMesh(mVulkanContext, false);
+
+			mMeshManager.addIndices({0, 1, 2});
+
+			mMeshManager.submitIndices(mVulkanContext, false);
+
 
 			mDeviceMemManager.transferOwnership(mVulkanContext, mVulkanContext.transferQueueIdx, mVulkanContext.graphicsQueueIdx);
 
-			
 
 			while (!mWindow.shouldClose()) {
 				mWindow.pollEvents();

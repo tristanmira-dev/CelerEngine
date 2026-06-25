@@ -19,16 +19,21 @@ namespace Celer {
 				vk::Buffer getUnderlyingBuffer();
 				MeshManager(Core::DeviceMemoryManager& memManager);
 				void addVertices(std::initializer_list<Vertex>&& initList);
-				void submitMesh(Core::VulkanContext& vulkanCtx);
-				void submitIndices(Core::VulkanContext& vulkanCtx);
+				void submitMesh(Core::VulkanContext& vulkanCtx, bool endOfBatch = true);
+				void submitIndices(Core::VulkanContext& vulkanCtx, bool endOfBatch = true);
 				inline uint32_t getVertexCount() {
 					return mLocalVerticesData.size();
 				}
 
+				inline uint32_t getIndicesCount() {
+					return static_cast<uint32_t>(mLocalIndexData.size());
+				}
+
 				void addIndices(std::initializer_list<uint32_t>&& initList);
 
-				inline uint32_t getSizeOfLocalInBytes() {
-					return mLocalVerticesData.size() * sizeof(*mLocalVerticesData.begin());
+				template<typename T>
+				inline uint32_t getSizeOfLocalInBytes(std::vector<T> data) {
+					return data.size() * sizeof(*data.begin());
 				}
 
 				inline Core::Memory getVertexMemoryInfo() {

@@ -20,6 +20,7 @@ namespace Celer {
 
 			public:
 				Memory() = default;
+				
 				Memory(uint32_t offset, uint32_t size, bool isFree) : mOffset{ offset }, mSize{ size }, mIsFree{ isFree } {}
 
 				inline uint32_t getSize() const {
@@ -57,6 +58,7 @@ namespace Celer {
 
 
 			public:
+				void batchUpload(VulkanContext& vulkanCtx, Memory const& memory, std::size_t dataSize);
 
 				void transferOwnership(VulkanContext& vulkanCtx, uint32_t oldQueueIdx, uint32_t newQueueIdx);
 
@@ -66,13 +68,17 @@ namespace Celer {
 					return mMainBuffer.getQueueOwner();
 				}
 
+				void beginBatchUpload();
+
+				void endBatchUpload();
+
 				void mainBuffAcquireQueueOwnership(Wrapper::CommandBuffer& commandBuffer, uint32_t commandBufferIdx, uint32_t oldOwnerIdx, uint32_t newOwnerIdx, vk::raii::Queue& queue, vk::raii::Fence& fence);
 
 				inline vk::Buffer getMainBuffer() {
 					return mMainBuffer.getBuffer();
 				}
 
-				void transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize);
+				void transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize, bool endOfBatch = true);
 
 				template<typename T>
 				Memory allocateMemory(uint32_t size) {
@@ -91,7 +97,10 @@ namespace Celer {
 				}
 
 				template<typename Iterable>
-				void addToDeviceBuffer(Iterable& container) {
+				void addToDeviceBuffer(Iterable& container, VulkanContext &vulkanContext) {
+					vulkanContext.device->waitForFences(*mTransferFence, vk::True, UINT64_MAX);
+					vulkanContext.device->resetFences(*mTransferFence);
+
 					//probably need to handle a case to do this in batches, cuz mStagingBuffer is less than the MainBuffer and what if container exceeds this (hypothetical)
 					memcpy(mMappedStagingBuff, container.data(), container.size() * sizeof(*container.begin()));
 				}
