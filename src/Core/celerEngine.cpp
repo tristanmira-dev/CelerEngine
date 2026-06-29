@@ -51,30 +51,31 @@ namespace Celer {
 			//float2(0.0, -0.5),
 			//	float2(0.5, 0.5),
 			//	float2(-0.5, 0.5)
-			mMeshManager.addVertices({ 
-				{
-					glm::vec3(0.f, -0.5f, 0.f),
-					glm::vec3(1.f, 0.f, 0.f),
-					//glm::vec2(1.f, 0.f)
-				},
-				{
-					glm::vec3(0.5f, 0.5f, 0.f),
-					glm::vec3(0.f, 1.f, 0.f),
-					//glm::vec2(1.f, 0.f)
-				},
-				{
-					glm::vec3(-0.5f, 0.5f, 0.f),
-					glm::vec3(0.f, 0.f, 1.f),
-					//glm::vec2(1.f, 0.f)
-				}
+			mMeshManager.addVertices({
+				{ glm::vec3(-1.5f, -0.5f,  5.f), glm::vec3(1.f, 0.f, 0.f) },
+				{ glm::vec3(-0.5f, -0.5f,  5.f), glm::vec3(0.f, 1.f, 0.f) },
+				{ glm::vec3(-0.5f,  0.5f,  5.f), glm::vec3(0.f, 0.f, 1.f) },
+				{ glm::vec3(-1.5f,  0.5f,  5.f), glm::vec3(1.f, 1.f, 0.f) },
+				{ glm::vec3(-1.5f, -0.5f,  4.5f), glm::vec3(1.f, 0.f, 1.f) },
+				{ glm::vec3(-0.5f, -0.5f,  4.5f), glm::vec3(0.f, 1.f, 1.f) },
+				{ glm::vec3(-0.5f,  0.5f,  4.5f), glm::vec3(1.f, 1.f, 1.f) },
+				{ glm::vec3(-1.5f,  0.5f,  4.5f), glm::vec3(0.f, 0.f, 0.f) },
 			});
 
 
 			mMeshManager.submitMesh(mVulkanContext, false);
 
-			mMeshManager.addIndices({0, 1, 2});
+			mMeshManager.addIndices({
+				0, 1, 2,  0, 2, 3, 
+				1, 5, 6,  1, 6, 2, 
+				5, 4, 7,  5, 7, 6, 
+				4, 0, 3,  4, 3, 7, 
+				3, 2, 6,  3, 6, 7, 
+				4, 5, 1,  4, 1, 0, 
+			});
 
 			mMeshManager.submitIndices(mVulkanContext, false);
+
 
 
 			mDeviceMemManager.transferOwnership(mVulkanContext, mVulkanContext.transferQueueIdx, mVulkanContext.graphicsQueueIdx);
@@ -87,7 +88,7 @@ namespace Celer {
 
 				//if (mWindow.getResized()) std::cout << "RESIZED\n";
 
-				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline.getPipeline(), mSwapchain, mWindow, mMeshManager, mDeviceMemManager);
+				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline, mSwapchain, mWindow, mMeshManager, mDeviceMemManager);
 				
 			}
 

@@ -2,9 +2,9 @@
 
 namespace Celer {
 	namespace Geometry {
-		glm::mat4 projection(GLFWwindow*& window, float fovDegrees, float n, float f) {
+		glm::mat4 projection(Core::Window& window, float fovDegrees, float n, float f) {
 			int width, height;
-			glfwGetWindowSize(window, &width, &height);
+			glfwGetWindowSize(window.getWindow(), &width, &height);
 
 			float aspect{ static_cast<float>(width) / height };
 

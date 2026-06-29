@@ -1,8 +1,10 @@
 #include "renderer.hpp"
+#include "pipeline.hpp"
+#include "common.hpp"
 
 namespace Celer {
 	namespace Render {
-		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager &meshManager, Core::DeviceMemoryManager& memManager) {
+		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager &meshManager, Core::DeviceMemoryManager& memManager) {
 
 			auto fenceResult{ vulkanCtx.device->waitForFences(*mFenceCollection[mCurrentFrameIdx], vk::True, UINT64_MAX) };
 
@@ -35,7 +37,7 @@ namespace Celer {
 				mCommandBuffer.getCommandBuffer(mCurrentFrameIdx).reset();
 			}
 
-			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager);
+			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager, window);
 
 			vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); /*only blocks when the gpu needs to write pixels to the image*/
 			const vk::SubmitInfo submitInfo{ .waitSemaphoreCount = 1, .pWaitSemaphores = &*mPresentFinished[mCurrentFrameIdx], .pWaitDstStageMask = &waitDestinationStageMask, .commandBufferCount = 1, .pCommandBuffers = &*mCommandBuffer.getCommandBuffer(mCurrentFrameIdx), .signalSemaphoreCount = 1, .pSignalSemaphores = &*mRenderFinished[imageIndex]};
@@ -54,7 +56,7 @@ namespace Celer {
 			mCurrentFrameIdx = (mCurrentFrameIdx + 1) % MAX_FRAMES_IN_FLIGHT;
 		
 		}
-		void Renderer::recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, vk::raii::Pipeline& pipeline, Geometry::MeshManager& meshManager) {
+		void Renderer::recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager& meshManager, Core::Window &window) {
 			vk::raii::CommandBuffer& currentCommandBuff{ mCommandBuffer.getCommandBuffer(mCurrentFrameIdx) };
 
 			auto& swapChainImg{ swapchainCtx.swapChainImages->getImage(imageIdx) };
@@ -121,7 +123,11 @@ namespace Celer {
 
 			currentCommandBuff.beginRendering(renderingInfo);
 
-			currentCommandBuff.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
+			
+
+			glm::mat4 proj = Geometry::projection(window, 100.f, 0.1f, 100.f);
+			currentCommandBuff.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline.getPipeline());
+			currentCommandBuff.pushConstants<glm::mat4>(*pipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0, proj);
 			currentCommandBuff.bindVertexBuffers(0, meshManager.getUnderlyingBuffer(), {meshManager.getVertexMemoryInfo().getOffset()});
 			currentCommandBuff.bindIndexBuffer(meshManager.getUnderlyingBuffer(), { meshManager.getIndicesMemoryInfo().getOffset() }, vk::IndexType::eUint32);
 

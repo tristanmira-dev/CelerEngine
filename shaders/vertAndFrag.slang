@@ -1,5 +1,9 @@
+struct PushConst {
+    float4x4 mtx;
+}
 
-
+[[vk::push_constant]]
+PushConst pushConst;
 
 struct VSInput {
     float3 position;
@@ -8,7 +12,7 @@ struct VSInput {
 };
 
 struct VertexOutput {
-    float4 sv_position : SV_Position; /*just denotes the output, : is a specifier indicating its a special gpu property*/
+    float4 sv_position : SV_Position; /*just denotes whether to perform perspective divide on it or to be used in rasterization*/
     float3 color;
     //float2 uv;
 }
@@ -16,7 +20,7 @@ struct VertexOutput {
 [shader("vertex")]
 VertexOutput vertMain(VSInput input) {
     VertexOutput output;
-    output.sv_position = float4(input.position, 1.0);
+    output.sv_position =  mul(pushConst.mtx, float4(input.position + float3(-1.0, 0.0, 2.0), 1.0));
     output.color = input.color;
     return output;
 }

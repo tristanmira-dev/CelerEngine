@@ -12,6 +12,8 @@ namespace Celer {
 			vk::raii::PipelineLayout mPipelineLayout{ nullptr };
 			vk::raii::Pipeline mPipeline{ nullptr };
 
+			
+
 			public:
 				
 				Pipeline() = default;
@@ -19,6 +21,11 @@ namespace Celer {
 				inline vk::raii::Pipeline& getPipeline() {
 					return mPipeline;
 				}
+				
+				inline vk::raii::PipelineLayout& getLayout() {
+					return mPipelineLayout;
+				}
+
 		};
 
 	}
