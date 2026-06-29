@@ -79,6 +79,7 @@ target_sources( mainTarget PRIVATE
     ${WRAPPER_DIR}/image.cpp
     ${WRAPPER_DIR}/vulkanBuffer.cpp
     ${GEOMETRY_DIR}/mesh.cpp
+    ${GEOMETRY_DIR}/common.cpp
 )
 
 target_sources( mainTarget PRIVATE 
@@ -98,6 +99,7 @@ target_sources( mainTarget PRIVATE
     ${WRAPPER_HEADER_DIR}/vulkanBuffer.hpp
     ${GEOMETRY_HEADER_DIR}/vertex.hpp
     ${GEOMETRY_HEADER_DIR}/mesh.hpp
+    ${GEOMETRY_HEADER_DIR}/common.hpp
 )
 
 #dependencies------------------------------------------------------------------------------------

@@ -16,7 +16,8 @@ namespace Celer {
 				std::vector<vk::DynamicState> mDynamicStates;
 				vk::PipelineDynamicStateCreateInfo mDynamicState;
 
-
+				/*Push Constants--------------*/
+				vk::PushConstantRange pushConsts;
 
 
 				/*Vertex input----------------*/
