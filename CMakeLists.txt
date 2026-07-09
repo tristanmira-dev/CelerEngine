@@ -75,6 +75,7 @@ target_sources( mainTarget PRIVATE
     ${RENDER_DIR}/pipeline.cpp
     ${RENDER_DIR}/pipelineBuilder.cpp
     ${RENDER_DIR}/renderer.cpp
+    ${RENDER_DIR}/texturemanager.cpp
     ${WRAPPER_DIR}/commandBuffer.cpp
     ${WRAPPER_DIR}/image.cpp
     ${WRAPPER_DIR}/vulkanBuffer.cpp
@@ -94,6 +95,7 @@ target_sources( mainTarget PRIVATE
     ${RENDER_HEADER_DIR}/pipelineBuilder.hpp
     ${RENDER_HEADER_DIR}/render_types.hpp
     ${RENDER_HEADER_DIR}/renderer.hpp
+    ${RENDER_HEADER_DIR}/texturemanager.hpp
     ${WRAPPER_HEADER_DIR}/commandBuffer.hpp
     ${WRAPPER_HEADER_DIR}/image.hpp
     ${WRAPPER_HEADER_DIR}/vulkanBuffer.hpp
