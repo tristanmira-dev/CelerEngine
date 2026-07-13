@@ -2,16 +2,22 @@
 #define RENDER_TEXTUREMANAGER_HPP
 
 #include "image.hpp"
-#include ""
+#include "deviceMemManager.hpp"
 
-class TextureManager {
-	private:
-		
+namespace Celer {
+	namespace Render {
+		class TextureManager {
+			private:
+				Core::DeviceMemoryManager& mDeviceManager;
+				//Wrapper::OwnedImage mImage;
+				Core::Memory mMemory;
 
+			public:
+				TextureManager(Core::DeviceMemoryManager& deviceManager);
+		};
+	}
+}
 
-	public:
-
-};
 
 
 #endif // RENDER_TEXTUREMANAGER_HPP

@@ -10,7 +10,8 @@ namespace Celer {
 			mVulkanInstance( mWindow, mVulkanContext ), 
 			mSwapchain(mVulkanContext, mSwapChainContext, mWindow),
 			mDeviceMemManager(mVulkanContext),
-			mMeshManager(mDeviceMemManager)
+			mMeshManager(mDeviceMemManager),
+			mTextureManager(mDeviceMemManager)
 		{
 
 			mWindow.setResizeEvent();
@@ -32,9 +33,6 @@ namespace Celer {
 			mPipeline.setPipeline(pipelineBuilder, *mVulkanContext.device, *mSwapChainContext.swapchainSurfaceFormat);
 			
 			mRenderer.init(mSwapChainContext, mVulkanContext);
-
-
-
 
 		}
 
