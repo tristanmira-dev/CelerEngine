@@ -3,7 +3,7 @@
 
 namespace Celer {
 	namespace Wrapper {
-		uint32_t Buffer::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties, vk::raii::PhysicalDevice const& physicalDevice) const {
+		uint32_t Buffer::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties, vk::raii::PhysicalDevice& physicalDevice) {
 			vk::PhysicalDeviceMemoryProperties memProperties{ physicalDevice.getMemoryProperties() };
 
 			for (uint32_t i{}; i < memProperties.memoryTypeCount; i++) {
@@ -15,6 +15,9 @@ namespace Celer {
 
 			throw std::runtime_error("Fresh outta luck pal, no memory types are available for u!");
 		}
+
+
+
 		Buffer Buffer::createDeviceLocalBuffer(vk::DeviceSize deviceSize, Core::VulkanContext vulkanCtx, vk::BufferUsageFlags flags) {
 			return Buffer(deviceSize, flags, vk::MemoryPropertyFlagBits::eDeviceLocal, vulkanCtx);
 		}

@@ -39,7 +39,9 @@ namespace Celer {
 				}
 
 				void clear();
-				void addImagesWithView(std::vector<ImageType> images, vk::Format format, vk::raii::Device& device);
+				void addImagesWithView(std::vector<ImageType> &&images, vk::Format format, vk::raii::Device& device);
+
+				void addOwnedImageWithView(vk::raii::Image &&image, vk::Format format, vk::raii::Device& device);
 
 				inline Image<ImageType>& getImage(uint32_t imageIdx) {
 					return mImageCollection[imageIdx];

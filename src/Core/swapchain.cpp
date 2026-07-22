@@ -118,9 +118,7 @@ namespace Celer {
 
 		void Swapchain::createImageView(vk::raii::Device &device) {
 
-			std::vector<vk::Image> images{ mSwapchain.getImages() };
-
-			mSwapchainImages.addImagesWithView(images, mSwapchainSurfaceFormat.format, device);
+			mSwapchainImages.addImagesWithView(mSwapchain.getImages(), mSwapchainSurfaceFormat.format, device);
 			std::cout << "Swapchain image (handle to non-owned) and imageviews created!\n";
 		
 		}

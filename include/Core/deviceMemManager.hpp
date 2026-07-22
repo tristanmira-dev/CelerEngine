@@ -42,23 +42,31 @@ namespace Celer {
 
 				uint32_t mMainBufferSize;
 
+
+				/*Linear buffers*/
 				Wrapper::Buffer mMainBuffer;
 				Wrapper::Buffer mStagingBuffer;
 				void* mMappedStagingBuff;
 
-				std::list<Memory> mMemoryTracker;
+				std::list<Memory> mMemoryTracker; //Separate user defined class later probably (the logic for memory alloc)
 
 				/*Queue*/
 				vk::raii::Queue& mTransferQueue;
 				uint32_t mTransferQueueIdx;
 
+				/*Sync Objects*/
 				Wrapper::CommandBuffer mCommandBuffer;
-
 				vk::raii::Semaphore mTransferFinished{ nullptr };
+
+				/*Non-linear buffers*/
+				vk::raii::DeviceMemory mImageDeviceMemory{ nullptr };
+				std::list<Memory> mImageMemoryTracker;
 
 
 			public:
 				void batchUpload(VulkanContext& vulkanCtx, Memory const& memory, std::size_t dataSize);
+
+				void createImageDeviceBuffer(VulkanContext& vulkanCtx, vk::DeviceSize deviceSize);
 
 				void transferOwnership(VulkanContext& vulkanCtx, uint32_t oldQueueIdx, uint32_t newQueueIdx);
 

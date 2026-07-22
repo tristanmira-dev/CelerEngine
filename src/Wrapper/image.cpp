@@ -66,7 +66,7 @@ namespace Celer {
 		}
 
 		template<typename ImageType>
-		void ImageCollection<ImageType>::addImagesWithView(std::vector<ImageType> images, vk::Format format, vk::raii::Device &device) {
+		void ImageCollection<ImageType>::addImagesWithView(std::vector<ImageType> &&images, vk::Format format, vk::raii::Device &device) {
 		
 			vk::ImageViewCreateInfo imageViewCreateInfo{
 				.viewType = vk::ImageViewType::e2D,
@@ -76,9 +76,22 @@ namespace Celer {
 
 			std::for_each(images.begin(), images.end(), [this, &imageViewCreateInfo, &device](ImageType &image) {
 				imageViewCreateInfo.image = getUnderlyingImage(image);
-				this->mImageCollection.emplace_back( std::move(image), vk::raii::ImageView(device, imageViewCreateInfo) );
+				this->mImageCollection.emplace_back( std::move(image), vk::raii::ImageView(device, imageViewCreateInfo) ); //Check exception safety for this
 				++mSize;
 			});
+		
+		}
+
+		template<typename ImageType>
+		void ImageCollection<ImageType>::addOwnedImageWithView(vk::raii::Image&& image, vk::Format format, vk::raii::Device& device) {
+			vk::ImageViewCreateInfo imageViewCreateInfo{
+				.viewType = vk::ImageViewType::e2D,
+				.format = format,
+				.subresourceRange = { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 }, //polz change this later
+			};
+
+			imageViewCreateInfo.image = *image;
+			mImageCollection.emplace_back(std::move(image), vk::raii::ImageView(device, imageViewCreateInfo));
 		
 		}
 

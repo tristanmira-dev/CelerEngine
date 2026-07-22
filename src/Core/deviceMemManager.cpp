@@ -26,6 +26,30 @@ namespace Celer {
 			mCommandBuffer.getSingleBuffer().pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, {}, {}, barrier, {});
 		}
 
+		void DeviceMemoryManager::createImageDeviceBuffer(VulkanContext& vulkanCtx, vk::DeviceSize deviceSize) {
+		
+			vk::ImageCreateInfo imageInfo{ 
+				.imageType = vk::ImageType::e2D,
+				.format = vk::Format::eR8G8B8A8Uint,
+				.extent = {1, 1, 1},
+				.mipLevels = 1,
+				.arrayLayers = 1,
+				.samples = vk::SampleCountFlagBits::e1,
+				.tiling = vk::ImageTiling::eOptimal,
+				.usage = vk::ImageUsageFlagBits::eColorAttachment,
+				.sharingMode = vk::SharingMode::eExclusive 
+			};
+
+			vk::raii::Image tempImg(*vulkanCtx.device, imageInfo);
+
+			vk::MemoryRequirements imgReq{ tempImg.getMemoryRequirements() };
+
+			vk::MemoryAllocateInfo memoryInfo{ .allocationSize = deviceSize,
+										 .memoryTypeIndex = Wrapper::Buffer::findMemoryType(imgReq.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal, *vulkanCtx.physicalDevice) };
+			
+			mImageDeviceMemory = vk::raii::DeviceMemory(*vulkanCtx.device, memoryInfo);
+		}
+
 		void DeviceMemoryManager::transferOwnership(VulkanContext &vulkanCtx, uint32_t oldQueueIdx, uint32_t newQueueIdx) {
 
 			vulkanCtx.device->waitForFences(*mTransferFence, vk::True, UINT64_MAX);
@@ -131,6 +155,8 @@ namespace Celer {
 			mTransferFence = vk::raii::Fence(*vulkanCtx.device, vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
 
 			mTransferFinished = vk::raii::Semaphore(*vulkanCtx.device, vk::SemaphoreCreateInfo{});
+
+			createImageDeviceBuffer(vulkanCtx, 1024 * 1024 * 500);
 
 			std::cout << "SANITY CHECK TRANSFER: " << vulkanCtx.transferQueueIdx << " GRAPHICS: " << vulkanCtx.graphicsQueueIdx << '\n';
 			//allocateMemory(4);

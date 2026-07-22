@@ -19,8 +19,6 @@ namespace Celer {
 
 				uint32_t mQueueOwner{ static_cast<uint32_t>(~0) };
 
-				uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties, vk::raii::PhysicalDevice const& physicalDevice) const;
-
 			public:
 				Buffer() = default;
 				Buffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const &ctx);
@@ -29,6 +27,9 @@ namespace Celer {
 				void* mapMemory();
 
 				void unmapMemory();
+
+
+				static uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties, vk::raii::PhysicalDevice& physicalDevice);
 
 				void operator=(Buffer&& src) noexcept;
 

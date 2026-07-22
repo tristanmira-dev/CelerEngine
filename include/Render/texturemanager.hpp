@@ -10,6 +10,8 @@ namespace Celer {
 			private:
 				Core::DeviceMemoryManager& mDeviceManager;
 				//Wrapper::OwnedImage mImage;
+
+				Wrapper::OwnedImageCollection mImageCollection;
 				Core::Memory mMemory;
 
 			public:
