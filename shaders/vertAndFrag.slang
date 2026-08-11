@@ -27,6 +27,13 @@ VertexOutput vertMain(VSInput input) {
 
 [shader("fragment")]
 float4 fragMain(VertexOutput vertIn) : SV_Target {
+    float heavyMath = 0.0;
+    for (int i = 0; i < 1000000; i++) {
+        heavyMath += sin(float(i)) * cos(float(i));
+    }
+
     float3 color = vertIn.color;
+    // mix it in so the compiler can't strip the loop
+    color += heavyMath * 0.0000001;
     return float4(color, 1.0);
 }

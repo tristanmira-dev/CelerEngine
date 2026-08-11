@@ -5,6 +5,8 @@ namespace Celer {
 
 	namespace Wrapper {
 
+		//const vk::Format TEXTURE_FORMAT{};
+
 		template<typename ImageType>
 		class Image {
 			private:
@@ -20,7 +22,13 @@ namespace Celer {
 
 				Image(Image&& image) noexcept;
 
+				void setImageView(vk::raii::Device& device, vk::Format format);
+
+				vk::MemoryRequirements getImageMemoryReq();
+
 				void transitionImageLayout(vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::AccessFlags2 srcAccessMask, vk::AccessFlags2 dstAccessMask, vk::PipelineStageFlags2 srcStageMask, vk::PipelineStageFlags2 dstStageMask, vk::ImageAspectFlags aspectFlag, vk::raii::CommandBuffer& commandBuff);
+
+				ImageType& imageRef();
 
 				~Image() = default;
 		};
@@ -41,7 +49,13 @@ namespace Celer {
 				void clear();
 				void addImagesWithView(std::vector<ImageType> &&images, vk::Format format, vk::raii::Device& device);
 
-				void addOwnedImageWithView(vk::raii::Image &&image, vk::Format format, vk::raii::Device& device);
+				Image<ImageType>& back() {
+					return mImageCollection.back();
+				}
+
+				void addOwnedImage(vk::Format format, vk::raii::Device& device, vk::Extent3D extents, vk::ImageTiling tiling, vk::ImageUsageFlags usageFlags);
+
+
 
 				inline Image<ImageType>& getImage(uint32_t imageIdx) {
 					return mImageCollection[imageIdx];

@@ -62,6 +62,8 @@ namespace Celer {
 				vk::raii::DeviceMemory mImageDeviceMemory{ nullptr };
 				std::list<Memory> mImageMemoryTracker;
 
+				
+
 
 			public:
 				void batchUpload(VulkanContext& vulkanCtx, Memory const& memory, std::size_t dataSize);
@@ -86,6 +88,9 @@ namespace Celer {
 					return mMainBuffer.getBuffer();
 				}
 
+				void bindImage(vk::raii::Image& img, Memory const& memory);
+				
+
 				void transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize, bool endOfBatch = true);
 
 				template<typename T>
@@ -101,6 +106,21 @@ namespace Celer {
 
 					mMemoryTracker.push_back(Memory{ getAlignedOffset(backIter.getOffset() + backIter.getSize(), alignof(T)), size, false });
 					return mMemoryTracker.back();
+
+				}
+
+				Memory allocateImageMemory(uint32_t size, uint32_t alignment) {
+
+					if (mImageMemoryTracker.size() == 0) {
+						mImageMemoryTracker.push_back(Memory{ 0, size, false });
+						return mImageMemoryTracker.back();
+
+					}
+
+					Memory backIter{ mImageMemoryTracker.back() };
+
+					mImageMemoryTracker.push_back(Memory{ getAlignedOffset(backIter.getOffset() + backIter.getSize(), alignment), size, false });
+					return mImageMemoryTracker.back();
 
 				}
 

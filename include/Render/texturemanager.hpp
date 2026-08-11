@@ -3,19 +3,23 @@
 
 #include "image.hpp"
 #include "deviceMemManager.hpp"
+#include "uploadManager.hpp"
 
 namespace Celer {
 	namespace Render {
 		class TextureManager {
 			private:
-				Core::DeviceMemoryManager& mDeviceManager;
+				Core::DeviceMemoryManager& mDeviceMemoryManager;
 				//Wrapper::OwnedImage mImage;
+				Wrapper::CommandBuffer mCommandBuff;
 
 				Wrapper::OwnedImageCollection mImageCollection;
-				Core::Memory mMemory;
+				std::vector<Core::Memory> mMemory;
 
 			public:
-				TextureManager(Core::DeviceMemoryManager& deviceManager);
+				TextureManager(Core::DeviceMemoryManager& deviceManager, Core::VulkanContext& ctx);
+
+				void addTexture(char const* file, Core::VulkanContext& ctx, Core::UploadManager& uploadManager);
 		};
 	}
 }

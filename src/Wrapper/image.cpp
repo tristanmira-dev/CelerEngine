@@ -1,5 +1,6 @@
 #include "image.hpp"
 
+
 namespace {
 	template<typename ImageType>
 	inline vk::Image const& getUnderlyingImage(ImageType& image) {
@@ -23,8 +24,39 @@ namespace Celer {
 		template<typename ImageType>
 		Image<ImageType>::Image(ImageType &&image, vk::raii::ImageView &&imageView) : mImage{ std::move(image) }, mImageView{ std::move(imageView) } { }
 
+
+		template<typename ImageType>
+		ImageType& Image<ImageType>::imageRef() {
+			return mImage;
+		}
+
 		template<typename ImageType>
 		Image<ImageType>::Image(Image<ImageType>&& image) noexcept : mImage{ std::move(image.mImage) }, mImageView{ std::move(image.mImageView) } {}
+
+		template<>
+		void Image<vk::raii::Image>::setImageView(vk::raii::Device& device, vk::Format format) {
+			vk::ImageViewCreateInfo imageViewCreateInfo{
+				.image = mImage,
+				.viewType = vk::ImageViewType::e2D,
+				.format = format,
+				.subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor, .baseMipLevel = 0, .levelCount = 1, .baseArrayLayer = 0, .layerCount = 1} 
+			};
+
+
+			imageViewCreateInfo.image = *mImage;	
+
+			mImageView = vk::raii::ImageView(device, imageViewCreateInfo);
+		}
+
+		template<>
+		vk::MemoryRequirements Image<vk::raii::Image>::getImageMemoryReq() {
+			return mImage.getMemoryRequirements();
+		}
+
+		template<>
+		vk::MemoryRequirements Image<vk::Image>::getImageMemoryReq() {
+			return vk::MemoryRequirements{};
+		}
 
 		template<typename ImageType>
 		void Image<ImageType>::transitionImageLayout(vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::AccessFlags2 srcAccessMask, vk::AccessFlags2 dstAccessMask, vk::PipelineStageFlags2 srcStageMask, vk::PipelineStageFlags2 dstStageMask, vk::ImageAspectFlags aspectFlag, vk::raii::CommandBuffer& commandBuff) {
@@ -83,15 +115,33 @@ namespace Celer {
 		}
 
 		template<typename ImageType>
-		void ImageCollection<ImageType>::addOwnedImageWithView(vk::raii::Image&& image, vk::Format format, vk::raii::Device& device) {
-			vk::ImageViewCreateInfo imageViewCreateInfo{
-				.viewType = vk::ImageViewType::e2D,
+		void ImageCollection<ImageType>::addOwnedImage(vk::Format format, vk::raii::Device& device, vk::Extent3D extents, vk::ImageTiling tiling, vk::ImageUsageFlags usage) {
+			vk::ImageCreateInfo imageCreateInfo{
+				.imageType = vk::ImageType::e2D,
 				.format = format,
-				.subresourceRange = { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 }, //polz change this later
+				.extent = extents,
+				.mipLevels = 1,
+				.arrayLayers = 1,
+				.samples = vk::SampleCountFlagBits::e1,
+				.tiling = tiling,
+				.usage = usage,
+				.sharingMode = vk::SharingMode::eExclusive 
 			};
 
-			imageViewCreateInfo.image = *image;
-			mImageCollection.emplace_back(std::move(image), vk::raii::ImageView(device, imageViewCreateInfo));
+			vk::raii::Image image(device, imageCreateInfo);
+			
+
+			//vk::ImageViewCreateInfo imageViewCreateInfo{
+			//	.image = image,
+			//	.viewType = vk::ImageViewType::e2D,
+			//	.format = format,
+			//	.subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor, .baseMipLevel = 0, .levelCount = 1, .baseArrayLayer = 0, .layerCount = 1} 
+			//};
+
+			//vk::raii::ImageView imageView{ vk::raii::ImageView(device, imageViewCreateInfo) };
+			
+			//imageViewCreateInfo.image = *image;
+			mImageCollection.emplace_back(std::move(image), nullptr);
 		
 		}
 
@@ -108,6 +158,7 @@ namespace Celer {
 
 		template class ImageCollection<vk::raii::Image>;
 		template class ImageCollection<vk::Image>;
+
 
 	}
 

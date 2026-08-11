@@ -10,11 +10,14 @@ namespace Celer {
 			mVulkanInstance( mWindow, mVulkanContext ), 
 			mSwapchain(mVulkanContext, mSwapChainContext, mWindow),
 			mDeviceMemManager(mVulkanContext),
+			mUploadManager(mVulkanContext),
 			mMeshManager(mDeviceMemManager),
-			mTextureManager(mDeviceMemManager)
+			mTextureManager(mDeviceMemManager, mVulkanContext),
+			mFrameCtx(mVulkanContext)
 		{
 
 			mWindow.setResizeEvent();
+
 
 			/*Pipeline*/
 			Render::PipelineBuilder pipelineBuilder;
@@ -42,6 +45,9 @@ namespace Celer {
 
 
 		void CelerEngine::run() {
+
+
+			mTextureManager.addTexture("./assets/textures/eddieblanket_edge.png", mVulkanContext, mUploadManager);
 
 			//Wrapper::Buffer buffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, mVulkanContext);
 			//
@@ -86,7 +92,11 @@ namespace Celer {
 
 				//if (mWindow.getResized()) std::cout << "RESIZED\n";
 
-				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline, mSwapchain, mWindow, mMeshManager, mDeviceMemManager);
+				//check to see if any asset is added, so local count == global count
+
+				mUploadManager.update(mFrameCtx, mVulkanContext, mDeviceMemManager);
+
+				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline, mSwapchain, mWindow, mMeshManager, mDeviceMemManager, mFrameCtx);
 				
 			}
 

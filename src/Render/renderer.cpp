@@ -4,7 +4,7 @@
 
 namespace Celer {
 	namespace Render {
-		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager &meshManager, Core::DeviceMemoryManager& memManager) {
+		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager &meshManager, Core::DeviceMemoryManager& memManager, Core::FrameContext &frameCtx) {
 
 			auto fenceResult{ vulkanCtx.device->waitForFences(*mFenceCollection[mCurrentFrameIdx], vk::True, UINT64_MAX) };
 
@@ -29,7 +29,6 @@ namespace Celer {
 
 			//updateUniformBuffer(frameIdx);
 
-			/*TODO, well you already know why... maybe set up semaphores and fences for this*/
 			if (memManager.getMainBuffOwner() != vulkanCtx.graphicsQueueIdx) {
 				memManager.mainBuffAcquireQueueOwnership(mCommandBuffer, mCurrentFrameIdx, memManager.getMainBuffOwner(), vulkanCtx.graphicsQueueIdx, *vulkanCtx.graphicsQueue, mTransferFence);
 				vulkanCtx.device->waitForFences(*mTransferFence, vk::True, UINT64_MAX);
@@ -39,9 +38,54 @@ namespace Celer {
 
 			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager, window);
 
+
+
+			frameCtx.mTimelineCount++;
+
+			//std::cout << frameCtx.mFrameSyncObject.mSemaphore.getCounterValue() << " " << frameCtx.mTimelineCount << '\n';
+
+
 			vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); /*only blocks when the gpu needs to write pixels to the image*/
-			const vk::SubmitInfo submitInfo{ .waitSemaphoreCount = 1, .pWaitSemaphores = &*mPresentFinished[mCurrentFrameIdx], .pWaitDstStageMask = &waitDestinationStageMask, .commandBufferCount = 1, .pCommandBuffers = &*mCommandBuffer.getCommandBuffer(mCurrentFrameIdx), .signalSemaphoreCount = 1, .pSignalSemaphores = &*mRenderFinished[imageIndex]};
-			vulkanCtx.graphicsQueue->submit(submitInfo, *mFenceCollection[mCurrentFrameIdx]);
+			
+			vk::SemaphoreSubmitInfo waitInfo{
+				.semaphore = *mPresentFinished[mCurrentFrameIdx],
+				.stageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput
+			};
+
+			vk::CommandBufferSubmitInfo commandBuffInfo{
+				.commandBuffer = *mCommandBuffer.getCommandBuffer(mCurrentFrameIdx)
+			};
+
+			vk::SemaphoreSubmitInfo binary {
+				.semaphore = *mRenderFinished[imageIndex],
+				.stageMask = vk::PipelineStageFlagBits2::eAllCommands
+			};
+
+			vk::SemaphoreSubmitInfo timeline{
+				.semaphore = *frameCtx.mFrameSyncObject.mSemaphore,
+				.value = frameCtx.mTimelineCount,
+				.stageMask = vk::PipelineStageFlagBits2::eAllCommands
+			};
+
+			std::array<vk::SemaphoreSubmitInfo, 2> semaphoreInfos{ binary, timeline };
+			//const vk::SubmitInfo submitInfo{ .waitSemaphoreCount = 1, .pWaitSemaphores = &*mPresentFinished[mCurrentFrameIdx], .pWaitDstStageMask = &waitDestinationStageMask, .commandBufferCount = 1, .pCommandBuffers = &*mCommandBuffer.getCommandBuffer(mCurrentFrameIdx), .signalSemaphoreCount = 1, .pSignalSemaphores = &*mRenderFinished[imageIndex] }; previous
+
+
+			const vk::SubmitInfo2 submitInfo{
+				.flags = {},
+				.waitSemaphoreInfoCount = 1, .pWaitSemaphoreInfos = &waitInfo,
+				.commandBufferInfoCount = 1, .pCommandBufferInfos = &commandBuffInfo,
+				.signalSemaphoreInfoCount = 2, .pSignalSemaphoreInfos = semaphoreInfos.data()
+
+			};
+
+
+			//std::cout << "BEFORE SUBMIT timeline Count: " << frameCtx.mTimelineCount << " vs global: " << frameCtx.mFrameSyncObject.mSemaphore.getCounterValue() << '\n';
+
+
+			vulkanCtx.graphicsQueue->submit2(submitInfo, *mFenceCollection[mCurrentFrameIdx]);
+			
+			//vulkanCtx.graphicsQueue->submit(submitInfo, );
 
 
 			const vk::PresentInfoKHR presentInfoKHR{ .waitSemaphoreCount = 1, .pWaitSemaphores = &*mRenderFinished[imageIndex], .swapchainCount = 1, .pSwapchains = &(**swapchainCtx.swapchain), .pImageIndices = &imageIndex };
@@ -52,7 +96,12 @@ namespace Celer {
 			}
 
 
-						
+
+			test[mCurrentFrameIdx]++;
+
+
+			//std::cout << "AFTER SUBMIT timeline Count: " << frameCtx.mTimelineCount << " vs global: " << frameCtx.mFrameSyncObject.mSemaphore.getCounterValue() << '\n';
+			//			
 			mCurrentFrameIdx = (mCurrentFrameIdx + 1) % MAX_FRAMES_IN_FLIGHT;
 		
 		}
@@ -181,6 +230,7 @@ namespace Celer {
 			mCommandBuffer = Wrapper::CommandBuffer(*vulkanCtx.device, MAX_FRAMES_IN_FLIGHT, vulkanCtx.graphicsQueueIdx);
 
 			mTransferFence = vk::raii::Fence(*vulkanCtx.device, vk::FenceCreateInfo{ });
+
 
 			std::size_t size{ swapchainCtx.swapChainImages->getSize() };
 

@@ -28,15 +28,16 @@ namespace Celer {
 
 		void DeviceMemoryManager::createImageDeviceBuffer(VulkanContext& vulkanCtx, vk::DeviceSize deviceSize) {
 		
+			/*TODO STORE THIS SHET*/
 			vk::ImageCreateInfo imageInfo{ 
 				.imageType = vk::ImageType::e2D,
-				.format = vk::Format::eR8G8B8A8Uint,
+				.format = vk::Format::eR8G8B8A8Srgb,
 				.extent = {1, 1, 1},
 				.mipLevels = 1,
 				.arrayLayers = 1,
 				.samples = vk::SampleCountFlagBits::e1,
 				.tiling = vk::ImageTiling::eOptimal,
-				.usage = vk::ImageUsageFlagBits::eColorAttachment,
+				.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
 				.sharingMode = vk::SharingMode::eExclusive 
 			};
 
@@ -83,6 +84,10 @@ namespace Celer {
 
 		}
 
+
+		void DeviceMemoryManager::bindImage(vk::raii::Image& img, Memory const& memory) {
+			img.bindMemory(mImageDeviceMemory, memory.getOffset());
+		}
 
 		void DeviceMemoryManager::transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize, bool endOfBatch) {
 

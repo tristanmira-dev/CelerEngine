@@ -4,6 +4,7 @@
 #include "contexts.hpp"
 #include <initializer_list>
 #include <iterator>
+#include <stb_image.h>
 
 namespace Celer {
 	namespace Wrapper {
@@ -12,17 +13,24 @@ namespace Celer {
 
 			private:
 
-				vk::DeviceSize mSize;
+				vk::DeviceSize mSize{};
 
 				vk::raii::Buffer mVkBuffer{ nullptr };
 				vk::raii::DeviceMemory mVkDeviceMemory{ nullptr };
 
 				uint32_t mQueueOwner{ static_cast<uint32_t>(~0) };
 
+				bool mIsMapped{ false };
+
 			public:
+				//static std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const& ctx);
 				Buffer() = default;
+
+
 				Buffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const &ctx);
 				Buffer(Buffer&& src) noexcept;
+
+				Buffer(Buffer const& src) = delete;
 
 				void* mapMemory();
 
@@ -67,10 +75,36 @@ namespace Celer {
 			public:
 
 				Wrapper::Buffer mBuffer;
+
+				BufferStagingResource(BufferStagingResource<T> const &stagingResource) = delete;
+
+				BufferStagingResource(BufferStagingResource<T> &&stagingResource) noexcept {
+					mBufferSize = stagingResource.mBufferSize;
+					mStagingBuffer = std::move(stagingResource.mStagingBuffer);
+					mBuffer = std::move(stagingResource.mBuffer);
+				}
+
+				void operator=(BufferStagingResource<T>&& stagingResource) noexcept {
+					mBufferSize = stagingResource.mBufferSize;
+					mStagingBuffer = std::move(stagingResource.mStagingBuffer);
+					mBuffer = std::move(stagingResource.mBuffer);
+				}
 				
 				BufferStagingResource(std::initializer_list<T> vals) {
 					mStagingBuffer.resize(vals.size());
 					std::copy(vals.begin(), vals.end(), mStagingBuffer.begin());
+				}
+
+				BufferStagingResource(void* data, uint64_t size, Core::VulkanContext& vulkanCtx) {
+					mStagingBuffer.resize(size / sizeof(T));
+
+					memcpy(mStagingBuffer.data(), data, size);
+
+					mBufferSize = mStagingBuffer.size() * sizeof(T);
+					mBuffer = Buffer(mBufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx);
+					
+					
+					copyBufferToLocal();
 				}
 
 				void initVulkanBuffer(Core::VulkanContext vulkanCtx, vk::BufferUsageFlags bufferUsage) {
@@ -83,10 +117,6 @@ namespace Celer {
 					std::copy(vals.begin(), vals.end(), std::back_inserter(mStagingBuffer));
 				}
 
-				void copyMemory() {
-					mBuffer.mapMemory();
-				}
-
 				void copyBufferToLocal() {
 					void* data{ mBuffer.mapMemory() };
 
@@ -95,6 +125,10 @@ namespace Celer {
 
 				vk::DeviceSize getSize() {
 					return static_cast<vk::DeviceSize>(mBufferSize);
+				}
+
+				~BufferStagingResource() {
+					mBuffer.unmapMemory();
 				}
 		};
 

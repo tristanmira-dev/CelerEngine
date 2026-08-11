@@ -237,9 +237,10 @@ namespace Celer {
 			}
 
 
-			vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan11Features, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain{
+			vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan11Features, vk::PhysicalDeviceVulkan12Features, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain{
 				{ .features = { .samplerAnisotropy = true } },
 				{ .shaderDrawParameters = true },
+				{ .timelineSemaphore = true },
 				{ .synchronization2 = true, .dynamicRendering = true },
 				{ .extendedDynamicState = true }
 			};

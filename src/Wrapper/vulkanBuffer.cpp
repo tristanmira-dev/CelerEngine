@@ -1,5 +1,5 @@
 #include "vulkanBuffer.hpp"
-
+#include <cassert>
 
 namespace Celer {
 	namespace Wrapper {
@@ -21,6 +21,7 @@ namespace Celer {
 		Buffer Buffer::createDeviceLocalBuffer(vk::DeviceSize deviceSize, Core::VulkanContext vulkanCtx, vk::BufferUsageFlags flags) {
 			return Buffer(deviceSize, flags, vk::MemoryPropertyFlagBits::eDeviceLocal, vulkanCtx);
 		}
+
 		Buffer::Buffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const& ctx) : mSize{size} {
 			vk::BufferCreateInfo bufferInfo{ .size = size, .usage = usage, .sharingMode = vk::SharingMode::eExclusive };
 			mVkBuffer = vk::raii::Buffer(*ctx.device, bufferInfo);
@@ -40,22 +41,35 @@ namespace Celer {
 		}
 
 		Buffer::Buffer(Buffer&& src) noexcept : mSize{ src.mSize }, mVkBuffer{ std::move(src.mVkBuffer) }, mVkDeviceMemory{ std::move(src.mVkDeviceMemory) }, mQueueOwner{ src.mQueueOwner }  {
+			src.mVkBuffer = nullptr;
+			src.mVkDeviceMemory = nullptr;
+		
 		}
 
 		void* Buffer::mapMemory() {
+			assert(mIsMapped == false && "WARNING, DOUBLE MAPPING!");
+			mIsMapped = true;
 			return mVkDeviceMemory.mapMemory(0, mSize);
 		
 		}
 
 		void Buffer::unmapMemory() {
+			assert(mIsMapped == true && "WARNING, DOUBLE UNMAPPING!");
 			mVkDeviceMemory.unmapMemory();
 		}
 
 		void Buffer::operator=(Buffer&& src) noexcept {
+
+
 			mSize = src.mSize;
 			mVkBuffer = std::move(src.mVkBuffer);
 			mVkDeviceMemory = std::move(src.mVkDeviceMemory);
 			mQueueOwner = src.mQueueOwner;
+
+
+			src.mVkBuffer = nullptr;
+			src.mVkDeviceMemory = nullptr;
+
 		}
 
 	}

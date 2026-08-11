@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_MODULE_STD 1)
+#set(CMAKE_CXX_MODULE_STD 1)
 project(LEARNVULKAN)
 
 
@@ -65,6 +65,7 @@ target_precompile_headers(mainTarget PRIVATE <iostream> <string> <vector> <array
 #EXTRA SOURCES----------------------------------
 
 target_sources( mainTarget PRIVATE 
+    src/stbi.cpp
     ${CORE_DIR}/main.cpp #entry point
     ${CORE_DIR}/celerEngine.cpp
     ${CORE_DIR}/vulkanInstance.cpp
@@ -72,6 +73,9 @@ target_sources( mainTarget PRIVATE
     ${CORE_DIR}/window.cpp
     ${CORE_DIR}/deviceMemManager.cpp
     ${CORE_DIR}/swapchain.cpp
+    ${CORE_DIR}/sync.cpp
+    ${CORE_DIR}/transferTracker.cpp #might remove
+    ${CORE_DIR}/uploadmanager.cpp
     ${RENDER_DIR}/pipeline.cpp
     ${RENDER_DIR}/pipelineBuilder.cpp
     ${RENDER_DIR}/renderer.cpp
@@ -87,10 +91,13 @@ target_sources( mainTarget PRIVATE
     ${CORE_HEADER_DIR}/celerEngine.hpp
     ${CORE_HEADER_DIR}/vulkanInstance.hpp
     ${CORE_HEADER_DIR}/contexts.hpp
+    ${CORE_HEADER_DIR}/sync.hpp
     ${CORE_HEADER_DIR}/extensions.hpp
     ${CORE_HEADER_DIR}/window.hpp
+    ${CORE_HEADER_DIR}/transferTracker.hpp
     ${CORE_HEADER_DIR}/swapchain.hpp
     ${CORE_HEADER_DIR}/deviceMemManager.hpp
+    ${CORE_HEADER_DIR}/uploadManager.hpp
     ${RENDER_HEADER_DIR}/pipeline.hpp
     ${RENDER_HEADER_DIR}/pipelineBuilder.hpp
     ${RENDER_HEADER_DIR}/render_types.hpp

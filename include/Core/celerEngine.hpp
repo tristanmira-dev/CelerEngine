@@ -12,6 +12,9 @@
 #include "deviceMemManager.hpp"
 #include "mesh.hpp"
 #include "texturemanager.hpp"
+#include "sync.hpp"
+
+#include "uploadManager.hpp"
 
 namespace Celer {
 
@@ -34,11 +37,17 @@ namespace Celer {
 				Render::Pipeline mPipeline; /*remove later pls*/
 				//Wrapper::CommandBuffer mCommandBuffer;
 				Core::DeviceMemoryManager mDeviceMemManager;
+
+				UploadManager mUploadManager;
+
 				Render::TextureManager mTextureManager;
 
 				Render::Renderer mRenderer;
 
 				Geometry::MeshManager mMeshManager;
+
+				FrameContext mFrameCtx;
+
 
 				/*Private Functions*/
 
