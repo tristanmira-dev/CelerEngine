@@ -45,6 +45,7 @@ namespace Celer {
 
 				Wrapper::CommandBuffer mCommandBuff;
 
+
 			public:
 
 				UploadManager(VulkanContext& vulkanContext);

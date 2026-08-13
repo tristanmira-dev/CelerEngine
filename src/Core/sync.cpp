@@ -4,6 +4,19 @@
 namespace Celer {
 
 	namespace Core {
+		void releaseBarrier(Celer::Wrapper::CommandBuffer& commandBuff, vk::raii::Image& img, uint32_t oldQueue, uint32_t newQueue) {
+			vk::ImageMemoryBarrier imageBarrier{ .oldLayout=vk::ImageLayout::eTransferDstOptimal ,.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal, .image = img };
+			imageBarrier.srcQueueFamilyIndex = oldQueue;
+			imageBarrier.dstQueueFamilyIndex = newQueue;
+			imageBarrier.subresourceRange = { .aspectMask = vk::ImageAspectFlagBits::eColor, .levelCount = 1, .layerCount = 1 };
+
+			imageBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+			imageBarrier.dstAccessMask = vk::AccessFlagBits::eNone;
+
+			commandBuff.getSingleBuffer().pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eNone, {}, {}, nullptr, imageBarrier);
+		
+		
+		}
 
 		void transitionLayout(Celer::Wrapper::CommandBuffer& commandBuff, vk::raii::Image& img, vk::ImageLayout oldLayout, vk::ImageLayout newLayout) {
 			vk::ImageMemoryBarrier imageBarrier{};
@@ -15,6 +28,9 @@ namespace Celer {
 			imageBarrier.dstQueueFamilyIndex = vk::QueueFamilyIgnored;
 			imageBarrier.srcQueueFamilyIndex = vk::QueueFamilyIgnored;
 
+			imageBarrier.image = img;
+
+			imageBarrier.subresourceRange = { .aspectMask = vk::ImageAspectFlagBits::eColor, .levelCount = 1, .layerCount = 1 };
 
 			if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal) {
 				imageBarrier.srcAccessMask = {};
@@ -56,7 +72,7 @@ namespace Celer {
 			vk::SemaphoreCreateInfo semaCreateInfo{ .pNext = &typeInfo2 };
 
 
-			mResourcePending = vk::raii::Semaphore(*ctx.device, semaCreateInfo);
+			mUpload = vk::raii::Semaphore(*ctx.device, semaCreateInfo);
 		}
 
 

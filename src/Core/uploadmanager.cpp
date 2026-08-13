@@ -32,10 +32,16 @@ namespace Celer {
 
 
 				/*LOOP THROUGH PENDING UPLOAD*/
+
+				mCommandBuff.beginSingleTimeCommand();
+
+
+
 				
 
 				for (ResourceUploadInfo& uploads : mPendingUpload) {
 					switch (uploads.mResourceType) {
+
 						case ResourceType::IMAGE: {
 							//mCommandBuff.beginSingleTimeCommand();
 
@@ -51,19 +57,53 @@ namespace Celer {
 							
 							*/
 
-							transitionLayout(mCommandBuff, *uploads.mImageResource, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+							//prolly need to do this on the graphics queue
+							//transitionLayout(mCommandBuff, *uploads.mImageResource, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+							releaseBarrier(mCommandBuff, *uploads.mImageResource, ctx.transferQueueIdx, ctx.graphicsQueueIdx);
 
 						}	
 							
 
-						break;
+							break;
+
 						case ResourceType::BUFFER:
 
 							break;
+
 						default:
 							break;
 					}
 				}
+
+				frameCtx.mUploadCount++;
+
+				vk::SemaphoreSubmitInfo timeline{
+					.semaphore = *frameCtx.mUpload,
+					.value = frameCtx.mUploadCount,
+					.stageMask = vk::PipelineStageFlagBits2::eTransfer
+				};
+
+				std::array<vk::SemaphoreSubmitInfo, 1> semaphoreInfos{ timeline };
+
+
+				mCommandBuff.getSingleBuffer().end();
+
+				mPendingUpload.pop_back();
+
+				vk::CommandBufferSubmitInfo commandBuffInfo {
+					.commandBuffer = *mCommandBuff.getSingleBuffer()
+				};
+
+				const vk::SubmitInfo2 submitInfo{
+					.flags = {},
+					.commandBufferInfoCount = 1, .pCommandBufferInfos = &commandBuffInfo,
+					.signalSemaphoreInfoCount = 1, .pSignalSemaphoreInfos = semaphoreInfos.data()
+
+				};
+
+
+
+				ctx.transferQueue->submit2(submitInfo, {});
 
 			} 
 		

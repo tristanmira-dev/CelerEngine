@@ -8,6 +8,8 @@ namespace Celer {
 
 	namespace Core {
 
+		void releaseBarrier(Celer::Wrapper::CommandBuffer& commandBuff, vk::raii::Image& img, uint32_t oldQueue, uint32_t newQueue);
+
 		void transitionLayout(Celer::Wrapper::CommandBuffer& commandBuff, vk::raii::Image& img, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
 
 		class FrameContext {
@@ -29,12 +31,13 @@ namespace Celer {
 				SemaphoreObject mFrameSyncObject;
 				uint64_t mTimelineCount{};
 
-
+				/*Dynamic sync*/
 				std::vector<SemaphoreObject> mSignalSemaphores;
 				std::vector<uint64_t> mTimelineCounts;
 
-
-				vk::raii::Semaphore mResourcePending = nullptr;
+				/*Upload Sync*/
+				vk::raii::Semaphore mUpload = nullptr;
+				uint64_t mUploadCount{};
 
 				void addSemaphore(SemaphoreType semaphoreType, Core::VulkanContext& ctx);
 
