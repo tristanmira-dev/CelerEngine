@@ -3,6 +3,11 @@
 namespace Celer {
 
 	namespace Wrapper {
+		void CommandBuffer::resetSingleBuff() {
+
+			mCommandBuffers[0].reset();
+
+		}
 		CommandBuffer::CommandBuffer(vk::raii::Device &device, uint32_t count, uint32_t queueFamilyIdx, vk::CommandBufferLevel bufferLevel) {
 			
 			vk::CommandPoolCreateInfo poolInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = queueFamilyIdx};

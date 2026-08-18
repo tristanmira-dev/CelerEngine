@@ -13,6 +13,8 @@ namespace Celer {
 
 				
 			public:
+
+				void resetSingleBuff();
 				
 				CommandBuffer() = default;
 				CommandBuffer(vk::raii::Device& device, uint32_t count, uint32_t queueFamilyIdx, vk::CommandBufferLevel bufferLevel = vk::CommandBufferLevel::ePrimary);

@@ -42,7 +42,8 @@ namespace Celer {
 
 			assert(mMemory.back().getSize() == imageMemReq.size && "WARNING, DIFFERENT MEMORY FROM THE IMAGE MEM REQUIREMENT");
 
-			uploadManager.addImageResource(ctx, Core::ResourceType::IMAGE, mMemory.back(), static_cast<void*>(pixels), &mImageCollection.back().imageRef());
+			//ADD ACTUAL UPLOAD REQUEST TO QUEUE (UPLOAD MANAGER)
+			uploadManager.addImageResource(ctx, Core::ResourceType::IMAGE, mMemory.back(), static_cast<void*>(pixels), &mImageCollection.back().imageRef(), texWidth, texHeight);
 
 			/*align*/
 

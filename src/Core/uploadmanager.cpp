@@ -6,21 +6,36 @@ namespace Celer {
 	namespace Core {
 		
 
+		void copyBufferToImage(Wrapper::CommandBuffer &commandBuffer, ResourceUploadInfo &uploadInfo) {
+			vk::BufferImageCopy region{ .bufferOffset = 0,
+											   .bufferRowLength = 0,
+											   .bufferImageHeight = 0,
+											   .imageSubresource = {.aspectMask = vk::ImageAspectFlagBits::eColor, .mipLevel = 0, .baseArrayLayer = 0, .layerCount = 1},
+											   .imageOffset = {0, 0, 0},
+											   .imageExtent = {uploadInfo.mWidth, uploadInfo.mHeight, 1
+			} };
 
-
-		UploadManager::UploadManager(VulkanContext &vulkanContext) : mCommandBuff(*vulkanContext.device, 1, vulkanContext.transferQueueIdx) {
+			commandBuffer.getSingleBuffer().copyBufferToImage(uploadInfo.mBuffer.getUnderlyingBuffer(), *uploadInfo.mImageResource, vk::ImageLayout::eTransferDstOptimal, region);
 		
 		}
 
-		void UploadManager::update(FrameContext& frameCtx, VulkanContext& ctx, DeviceMemoryManager& memoryManager) {
 
+		UploadManager::UploadManager(VulkanContext &vulkanContext) : mCommandBuff(*vulkanContext.device, 1, vulkanContext.transferQueueIdx), mGraphicsCommandBuff(*vulkanContext.device, 1, vulkanContext.graphicsQueueIdx) {
+			mUploadFence = vk::raii::Fence(*vulkanContext.device, vk::FenceCreateInfo{ .flags = vk::FenceCreateFlagBits::eSignaled });
+		}
+
+		void UploadManager::addAcquire(ResourceAcquireInfo const &info) {
+
+			mPendingAcquire.push_back(info);
+
+		}
+
+		void UploadManager::upload(FrameContext &frameCtx, VulkanContext &ctx) {
 
 			if (mPendingUpload.size()) {
 
 				if (frameCtx.mTimelineCount != frameCtx.mFrameSyncObject.mSemaphore.getCounterValue()) {
 					std::cout << "UNSYNCED!!! " << frameCtx.mTimelineCount << " " << frameCtx.mFrameSyncObject.mSemaphore.getCounterValue() << '\n';
-
-
 
 					vk::SemaphoreWaitInfo waitInfo{ .semaphoreCount = 1, .pSemaphores = &*frameCtx.mFrameSyncObject.mSemaphore, .pValues = &frameCtx.mTimelineCount };
 
@@ -30,50 +45,49 @@ namespace Celer {
 
 				}
 
-
-				/*LOOP THROUGH PENDING UPLOAD*/
+				mCommandBuff.getSingleBuffer().reset();
 
 				mCommandBuff.beginSingleTimeCommand();
 
 
 
-				
-
 				for (ResourceUploadInfo& uploads : mPendingUpload) {
+
 					switch (uploads.mResourceType) {
 
-						case ResourceType::IMAGE: {
-							//mCommandBuff.beginSingleTimeCommand();
+					case ResourceType::IMAGE: {
+						//reset command buffer first....
 
-							vk::raii::CommandBuffer &commandBuff{ mCommandBuff.getSingleBuffer() };
+						vk::raii::CommandBuffer& commandBuff{ mCommandBuff.getSingleBuffer() };
 
-							transitionLayout(mCommandBuff, *uploads.mImageResource, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+						transitionLayout(mCommandBuff, *uploads.mImageResource, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
-							/*
-								transition image first from undefined to dst optimal layout
-								actual copy from host visible to local device happens here
-								transition image to sample optimal
-							
-							
-							*/
+						copyBufferToImage(mCommandBuff, uploads);
 
-							//prolly need to do this on the graphics queue
-							//transitionLayout(mCommandBuff, *uploads.mImageResource, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
-							releaseBarrier(mCommandBuff, *uploads.mImageResource, ctx.transferQueueIdx, ctx.graphicsQueueIdx);
+						releaseBarrier(mCommandBuff, *uploads.mImageResource, ctx.transferQueueIdx, ctx.graphicsQueueIdx);
 
-						}	
-							
+						addAcquire(ResourceAcquireInfo{
+							.oldQueue = ctx.transferQueueIdx,
+							.newQueue = ctx.graphicsQueueIdx,
+							.mImageResource = uploads.mImageResource
+						}); //ADD PROPERTY TO SPECIFY WHICH QUEUE
 
-							break;
+					}
 
-						case ResourceType::BUFFER:
+						break;
 
-							break;
+					case ResourceType::BUFFER:
 
-						default:
-							break;
+						//todo u animal
+
+						break;
+
+					default:
+						break;
 					}
 				}
+
+				mCommandBuff.getSingleBuffer().end();
 
 				frameCtx.mUploadCount++;
 
@@ -86,11 +100,7 @@ namespace Celer {
 				std::array<vk::SemaphoreSubmitInfo, 1> semaphoreInfos{ timeline };
 
 
-				mCommandBuff.getSingleBuffer().end();
-
-				mPendingUpload.pop_back();
-
-				vk::CommandBufferSubmitInfo commandBuffInfo {
+				vk::CommandBufferSubmitInfo commandBuffInfo{
 					.commandBuffer = *mCommandBuff.getSingleBuffer()
 				};
 
@@ -101,23 +111,79 @@ namespace Celer {
 
 				};
 
-
-
 				ctx.transferQueue->submit2(submitInfo, {});
 
-			} 
-		
+				vk::SemaphoreWaitInfo semaWait{ .semaphoreCount = 1, .pSemaphores = &*frameCtx.mUpload, .pValues = &frameCtx.mUploadCount };
+
+				//wait on the same upload lol no choice
+				ctx.device->waitSemaphores(semaWait, UINT64_MAX);
+
+				mPendingUpload.clear();
+
+			}
+
 		}
 
-		void UploadManager::addImageResource(VulkanContext& vulkanCtx, ResourceType resourceType, Memory memoryInfo, void* data, vk::raii::Image *image) {
+		void UploadManager::acquire(FrameContext& frameCtx, VulkanContext& ctx) {
+
+
+			if (!mPendingAcquire.empty()) {
+
+				mGraphicsCommandBuff.resetSingleBuff();
+				mGraphicsCommandBuff.beginSingleTimeCommand();
+
+				//TODO BATCH PIPELINE BARRIERS
+
+				for (ResourceAcquireInfo& acquireInfo : mPendingAcquire) {
+
+
+					vk::ImageMemoryBarrier imgMemory{
+						.srcAccessMask = vk::AccessFlagBits::eNone,
+						.dstAccessMask = vk::AccessFlagBits::eShaderRead,
+						.oldLayout = vk::ImageLayout::eTransferDstOptimal,
+						.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+						.srcQueueFamilyIndex = ctx.transferQueueIdx,
+						.dstQueueFamilyIndex = ctx.graphicsQueueIdx,
+						.image = **acquireInfo.mImageResource,
+					};
+
+					imgMemory.subresourceRange = { .aspectMask = vk::ImageAspectFlagBits::eColor, .levelCount = 1, .layerCount = 1 };
+
+					mGraphicsCommandBuff.getSingleBuffer().pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eFragmentShader, {}, {}, {}, imgMemory);
+
+
+				}
+
+				mPendingAcquire.clear();
+
+				mGraphicsCommandBuff.getSingleBuffer().end();
+
+				ctx.graphicsQueue->submit(vk::SubmitInfo{ .commandBufferCount = 1, .pCommandBuffers = &*mGraphicsCommandBuff.getSingleBuffer() });
+			}
+			
+		}
+
+		void UploadManager::update(FrameContext& frameCtx, VulkanContext& ctx, DeviceMemoryManager& memoryManager) {
+
+			upload(frameCtx, ctx);
+
+			acquire(frameCtx, ctx);
+
+		}
+
+		void UploadManager::addImageResource(VulkanContext& vulkanCtx, ResourceType resourceType, Memory memoryInfo, void* data, vk::raii::Image *image, uint32_t width, uint32_t height) {
 			switch (resourceType) {
 				case ResourceType::IMAGE:
-					mPendingUpload.emplace_back(resourceType, memoryInfo, data, vulkanCtx, image, nullptr);
+					
+					mPendingUpload.emplace_back(resourceType, memoryInfo, data, vulkanCtx, image, nullptr, width, height);
 					break;
+
 				case ResourceType::BUFFER:
 					
 					break;
+
 				default:
+
 					break;
 
 			}
@@ -125,7 +191,7 @@ namespace Celer {
 		
 		}
 
-		ResourceUploadInfo::ResourceUploadInfo(ResourceType resourceType, Memory memory, void* data, VulkanContext& ctx, vk::raii::Image* image, vk::raii::Buffer* buffer) : mResourceType{ resourceType }, mMemoryInfo{ memory }, mBuffer(data, memory.getSize(), ctx), mImageResource{ image }, mBufferResource{ buffer } {
+		ResourceUploadInfo::ResourceUploadInfo(ResourceType resourceType, Memory memory, void* data, VulkanContext& ctx, vk::raii::Image* image, vk::raii::Buffer* buffer, uint32_t width, uint32_t height) : mResourceType{ resourceType }, mMemoryInfo{ memory }, mBuffer(data, memory.getSize(), ctx), mImageResource{ image }, mBufferResource{ buffer }, mWidth{ width }, mHeight{ height } {
 			
 		
 		}

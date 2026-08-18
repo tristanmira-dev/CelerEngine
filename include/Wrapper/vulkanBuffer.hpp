@@ -127,6 +127,10 @@ namespace Celer {
 					return static_cast<vk::DeviceSize>(mBufferSize);
 				}
 
+				vk::Buffer getUnderlyingBuffer() {
+					return mBuffer.getBuffer();
+				}
+
 				~BufferStagingResource() {
 					mBuffer.unmapMemory();
 				}
