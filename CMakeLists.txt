@@ -74,7 +74,6 @@ target_sources( mainTarget PRIVATE
     ${CORE_DIR}/deviceMemManager.cpp
     ${CORE_DIR}/swapchain.cpp
     ${CORE_DIR}/sync.cpp
-    ${CORE_DIR}/transferTracker.cpp #might remove
     ${CORE_DIR}/uploadmanager.cpp
     ${RENDER_DIR}/pipeline.cpp
     ${RENDER_DIR}/pipelineBuilder.cpp
@@ -94,7 +93,6 @@ target_sources( mainTarget PRIVATE
     ${CORE_HEADER_DIR}/sync.hpp
     ${CORE_HEADER_DIR}/extensions.hpp
     ${CORE_HEADER_DIR}/window.hpp
-    ${CORE_HEADER_DIR}/transferTracker.hpp
     ${CORE_HEADER_DIR}/swapchain.hpp
     ${CORE_HEADER_DIR}/deviceMemManager.hpp
     ${CORE_HEADER_DIR}/uploadManager.hpp

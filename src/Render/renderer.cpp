@@ -4,7 +4,7 @@
 
 namespace Celer {
 	namespace Render {
-		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager &meshManager, Core::DeviceMemoryManager& memManager, Core::FrameContext &frameCtx) {
+		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager &meshManager, Core::DeviceMemoryManager& memManager, Core::FrameContext &frameCtx, std::vector<vk::raii::DescriptorSet>& descriptor) {
 
 			auto fenceResult{ vulkanCtx.device->waitForFences(*mFenceCollection[mCurrentFrameIdx], vk::True, UINT64_MAX) };
 
@@ -36,7 +36,7 @@ namespace Celer {
 				mCommandBuffer.getCommandBuffer(mCurrentFrameIdx).reset();
 			}
 
-			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager, window);
+			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager, window, descriptor);
 
 
 
@@ -105,7 +105,9 @@ namespace Celer {
 			mCurrentFrameIdx = (mCurrentFrameIdx + 1) % MAX_FRAMES_IN_FLIGHT;
 		
 		}
-		void Renderer::recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager& meshManager, Core::Window &window) {
+
+
+		void Renderer::recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager& meshManager, Core::Window &window, std::vector<vk::raii::DescriptorSet>& descriptorSet) {
 			vk::raii::CommandBuffer& currentCommandBuff{ mCommandBuffer.getCommandBuffer(mCurrentFrameIdx) };
 
 			auto& swapChainImg{ swapchainCtx.swapChainImages->getImage(imageIdx) };
@@ -179,6 +181,7 @@ namespace Celer {
 			currentCommandBuff.pushConstants<glm::mat4>(*pipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0, proj);
 			currentCommandBuff.bindVertexBuffers(0, meshManager.getUnderlyingBuffer(), {meshManager.getVertexMemoryInfo().getOffset()});
 			currentCommandBuff.bindIndexBuffer(meshManager.getUnderlyingBuffer(), { meshManager.getIndicesMemoryInfo().getOffset() }, vk::IndexType::eUint32);
+			currentCommandBuff.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.getLayout(), 0, *descriptorSet[mCurrentFrameIdx], {});
 
 			//currentCommandBuff.bindVertexBuffers(0, *vertexBuffer, { 0 });
 			//currentCommandBuff.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, *descriptorSets[frameIdx], nullptr);

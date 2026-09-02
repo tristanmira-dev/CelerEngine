@@ -1,3 +1,5 @@
-1. Managing different queue families for present, graphics etc AND one time command buffer submissions (look into this cuz im not entirely sure too).
-2. Make a better function to filter physical devices
-	- Stuff like optional features like anisotropic filtering, should be a flag that turns this on during the texture sampler creation
+~~1. Actually finish descriptor sets for samplers~~
+2. Depth buffers 
+3. Fix allocator or make it into an abstraction (class)
+4. migrate vertex upload to upload manager
+5. look more into the inefficiencies of having separate descriptor sets for resources

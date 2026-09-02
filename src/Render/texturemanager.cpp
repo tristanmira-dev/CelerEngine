@@ -8,14 +8,28 @@ namespace {
 
 namespace Celer {
 	namespace Render {
-		TextureManager::TextureManager(Core::DeviceMemoryManager& deviceManager, Core::VulkanContext& ctx) : mDeviceMemoryManager{ deviceManager }, mCommandBuff(*ctx.device, 1, ctx.transferQueueIdx) {
-
-			
-
-
+		vk::raii::ImageView& TextureManager::getImageView(uint32_t idx) {
+			return mImageCollection.getImage(idx).mImageView;
 		}
 
-		
+		TextureManager::TextureManager(Core::DeviceMemoryManager& deviceManager, Core::VulkanContext& ctx) : mDeviceMemoryManager{ deviceManager }, mCommandBuff(*ctx.device, 1, ctx.transferQueueIdx) {
+
+			//Init sampler
+			vk::PhysicalDeviceProperties props{ ctx.physicalDevice->getProperties() };
+
+			vk::SamplerCreateInfo samplerInfo{ .magFilter = vk::Filter::eLinear, .minFilter = vk::Filter::eLinear, .mipmapMode = vk::SamplerMipmapMode::eLinear, .addressModeU = vk::SamplerAddressMode::eRepeat, .addressModeV = vk::SamplerAddressMode::eRepeat, .anisotropyEnable = vk::True, .maxAnisotropy = props.limits.maxSamplerAnisotropy, .compareEnable = vk::False, .compareOp = vk::CompareOp::eAlways };
+
+			samplerInfo.borderColor = vk::BorderColor::eIntOpaqueBlack;
+
+			samplerInfo.unnormalizedCoordinates = vk::False;
+
+			samplerInfo.mipLodBias = 0.f;
+			samplerInfo.minLod = 0.f;
+			samplerInfo.maxLod = 0.f;
+
+			mSampler = vk::raii::Sampler(*ctx.device, samplerInfo);
+
+		}
 
 
 		void TextureManager::addTexture(char const* file, Core::VulkanContext& ctx, Core::UploadManager& uploadManager) {
@@ -42,7 +56,7 @@ namespace Celer {
 
 			assert(mMemory.back().getSize() == imageMemReq.size && "WARNING, DIFFERENT MEMORY FROM THE IMAGE MEM REQUIREMENT");
 
-			//ADD ACTUAL UPLOAD REQUEST TO QUEUE (UPLOAD MANAGER)
+			//ADD ACTUAL UPLOAD REQUEST TO QUEUE(NOT ANY GRAPHICS QUEUE, UPLOAD MANAGER'S PENDING UPLOADS)
 			uploadManager.addImageResource(ctx, Core::ResourceType::IMAGE, mMemory.back(), static_cast<void*>(pixels), &mImageCollection.back().imageRef(), texWidth, texHeight);
 
 			/*align*/

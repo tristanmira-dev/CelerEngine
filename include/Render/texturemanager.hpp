@@ -12,11 +12,15 @@ namespace Celer {
 				Core::DeviceMemoryManager& mDeviceMemoryManager;
 				//Wrapper::OwnedImage mImage;
 				Wrapper::CommandBuffer mCommandBuff;
-
 				Wrapper::OwnedImageCollection mImageCollection;
 				std::vector<Core::Memory> mMemory;
 
 			public:
+
+				vk::raii::ImageView& getImageView(uint32_t idx);
+
+				vk::raii::Sampler mSampler = nullptr;
+
 				TextureManager(Core::DeviceMemoryManager& deviceManager, Core::VulkanContext& ctx);
 
 				void addTexture(char const* file, Core::VulkanContext& ctx, Core::UploadManager& uploadManager);

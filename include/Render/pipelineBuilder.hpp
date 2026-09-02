@@ -5,12 +5,23 @@ namespace Celer {
 	/*INCLUDES BOILERPLATE DEFAULT PIPELINE BUILDER OBJECTS!*/
 	namespace Render {
 		class PipelineBuilder {
+			constexpr static int MAX_FRAMES_IN_FLIGHT{ 2 };
+
+			private:
+
+				void createDescriptorPool();
+
+				void createDescriptorLayout();
+
+				void createDescriptorSet();
+
+				void createDescriptorWriteSet();
+
 			public:
 
 				vk::raii::ShaderModule mShaderModule{ nullptr };
 
 				std::vector<vk::PipelineShaderStageCreateInfo> mShadersStage;
-
 
 				/*DYNAMIC STATES---------------*/
 				std::vector<vk::DynamicState> mDynamicStates;
@@ -54,6 +65,15 @@ namespace Celer {
 
 				vk::Format mDepthFormat;
 
+				/*Descriptors*/
+				vk::DescriptorSetLayoutCreateInfo mDescriptorSetLayoutCreateInfo;
+				std::vector<vk::DescriptorPoolSize> mDescriptorPoolSize;
+				std::vector<vk::DescriptorSetLayoutBinding> mDescriptorSetLayoutBinding;
+				std::vector<vk::WriteDescriptorSet> mDescriptorWriteSet;
+
+
+				vk::DescriptorPoolCreateInfo mDescriptorPoolCreateInfo;
+
 				/*Member functions*/
 
 				/**
@@ -71,6 +91,7 @@ namespace Celer {
 				void createShader(std::string const& path, vk::raii::Device &device);
 
 				void addVertexBufferInfo();
+
 
 				vk::raii::ShaderModule createShaderModule(std::vector<char> const& shaderData, vk::raii::Device& device) const;
 

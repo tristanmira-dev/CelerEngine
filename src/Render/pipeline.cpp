@@ -2,12 +2,49 @@
 
 namespace Celer {
 	namespace Render {
-		void Pipeline::setPipeline(PipelineBuilder const& pipelineBuilder, vk::raii::Device &device, vk::SurfaceFormatKHR& swapchainSurfaceFormat) {
-			vk::PipelineLayoutCreateInfo layoutCreateInfo{ .setLayoutCount = 0, .pSetLayouts = nullptr ,.pushConstantRangeCount = 1, .pPushConstantRanges = &pipelineBuilder.pushConsts }; /*"my shaders don't use any uniforms or push constants right now."*/
+		void Pipeline::createDescriptorSet(vk::raii::Device &device) {
+
+			std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, mDescriptorSetLayout);
+
+			vk::DescriptorSetAllocateInfo allocInfo{ .descriptorPool = *mDescriptorPool, .descriptorSetCount = static_cast<uint32_t>(layouts.size()), .pSetLayouts = layouts.data() };
+
+			mDescriptorSets = device.allocateDescriptorSets(allocInfo);
+
+		}
+
+		void Pipeline::updateDescriptorImage(vk::raii::Device &device, vk::raii::ImageView& imageView, vk::raii::Sampler& sampler, uint32_t idx) {
+			for (int i{}; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+
+				vk::DescriptorImageInfo imageInfo{ .sampler = sampler, .imageView = imageView, .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal };
+
+
+				vk::WriteDescriptorSet writeSet{ .dstArrayElement = idx, .descriptorCount = 1 };
+
+				writeSet.dstSet = mDescriptorSets[i];
+				writeSet.dstBinding = 0;
+
+				writeSet.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+				writeSet.pImageInfo = &imageInfo;
+				
+				device.updateDescriptorSets(writeSet, {});
+
+			}
+		}
+
+		void Pipeline::setPipeline(PipelineBuilder &pipelineBuilder, vk::raii::Device &device, vk::SurfaceFormatKHR& swapchainSurfaceFormat) {
+			vk::PipelineLayoutCreateInfo layoutCreateInfo{ .pSetLayouts = nullptr ,.pushConstantRangeCount = 1, .pPushConstantRanges = &pipelineBuilder.pushConsts };
+
+			mDescriptorSetLayout = vk::raii::DescriptorSetLayout(device, pipelineBuilder.mDescriptorSetLayoutCreateInfo);
+
+			layoutCreateInfo.setLayoutCount = 1;
+
+			layoutCreateInfo.pSetLayouts = &*mDescriptorSetLayout;
+
 			mPipelineLayout = vk::raii::PipelineLayout(device, layoutCreateInfo);
 
-			//vk::Format depthFormat{ findDepthFormat() };
+			mDescriptorPool = vk::raii::DescriptorPool(device, pipelineBuilder.mDescriptorPoolCreateInfo);
 
+			createDescriptorSet(device);
 
 			vk::StructureChain<vk::GraphicsPipelineCreateInfo, vk::PipelineRenderingCreateInfo> chain{
 				{

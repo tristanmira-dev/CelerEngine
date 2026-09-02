@@ -18,7 +18,7 @@ namespace Celer {
 
 
 
-				void recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager &meshManager, Core::Window &window);
+				void recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager &meshManager, Core::Window &window, std::vector<vk::raii::DescriptorSet> &descriptor);
 
 
 				Wrapper::CommandBuffer mCommandBuffer;
@@ -33,7 +33,7 @@ namespace Celer {
 			public:
 				Renderer() = default;
 
-				void drawFrame(Core::VulkanContext& vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager& meshManager, Core::DeviceMemoryManager& memManager, Core::FrameContext& frameCtx);
+				void drawFrame(Core::VulkanContext& vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager& meshManager, Core::DeviceMemoryManager& memManager, Core::FrameContext& frameCtx, std::vector<vk::raii::DescriptorSet>& descriptor);
 				void init(Core::SwapchainContext& swapchainCtx, Core::VulkanContext& vulkanCtx);
 				static constexpr uint32_t MAX_FRAMES_IN_FLIGHT{ 2 };
 

@@ -49,6 +49,9 @@ namespace Celer {
 
 			mTextureManager.addTexture("./assets/textures/eddieblanket_edge.png", mVulkanContext, mUploadManager);
 
+			
+			mPipeline.updateDescriptorImage(*mVulkanContext.device, mTextureManager.getImageView(0), mTextureManager.mSampler, 0);
+
 			//Wrapper::Buffer buffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, mVulkanContext);
 			//
 
@@ -56,26 +59,17 @@ namespace Celer {
 			//	float2(0.5, 0.5),
 			//	float2(-0.5, 0.5)
 			mMeshManager.addVertices({
-				{ glm::vec3(-1.5f, -0.5f,  5.f), glm::vec3(1.f, 0.f, 0.f) },
-				{ glm::vec3(-0.5f, -0.5f,  5.f), glm::vec3(0.f, 1.f, 0.f) },
-				{ glm::vec3(-0.5f,  0.5f,  5.f), glm::vec3(0.f, 0.f, 1.f) },
-				{ glm::vec3(-1.5f,  0.5f,  5.f), glm::vec3(1.f, 1.f, 0.f) },
-				{ glm::vec3(-1.5f, -0.5f,  4.5f), glm::vec3(1.f, 0.f, 1.f) },
-				{ glm::vec3(-0.5f, -0.5f,  4.5f), glm::vec3(0.f, 1.f, 1.f) },
-				{ glm::vec3(-0.5f,  0.5f,  4.5f), glm::vec3(1.f, 1.f, 1.f) },
-				{ glm::vec3(-1.5f,  0.5f,  4.5f), glm::vec3(0.f, 0.f, 0.f) },
+				{ glm::vec3(-1.5f, -0.5f,  5.0f), glm::vec3(1.f, 0.f, 0.f), glm::vec2(0.f, 1.f) }, // Bottom-Left
+				{ glm::vec3(-0.5f, -0.5f,  3.5f), glm::vec3(0.f, 1.f, 0.f), glm::vec2(1.f, 1.f) }, // Bottom-Right 
+				{ glm::vec3(-0.5f,  0.5f,  3.5f), glm::vec3(0.f, 0.f, 1.f), glm::vec2(1.f, 0.f) }, // Top-Right
+				{ glm::vec3(-1.5f,  0.5f,  5.0f), glm::vec3(1.f, 1.f, 0.f), glm::vec2(0.f, 0.f) }, // Top-Left
 			});
 
 
 			mMeshManager.submitMesh(mVulkanContext, false);
 
 			mMeshManager.addIndices({
-				0, 1, 2,  0, 2, 3, 
-				1, 5, 6,  1, 6, 2, 
-				5, 4, 7,  5, 7, 6, 
-				4, 0, 3,  4, 3, 7, 
-				3, 2, 6,  3, 6, 7, 
-				4, 5, 1,  4, 1, 0, 
+				0, 1, 2, 0, 2, 3
 			});
 
 			mMeshManager.submitIndices(mVulkanContext, false);
@@ -96,7 +90,7 @@ namespace Celer {
 
 				mUploadManager.update(mFrameCtx, mVulkanContext, mDeviceMemManager);
 
-				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline, mSwapchain, mWindow, mMeshManager, mDeviceMemManager, mFrameCtx);
+				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline, mSwapchain, mWindow, mMeshManager, mDeviceMemManager, mFrameCtx, mPipeline.mDescriptorSets);
 				
 			}
 

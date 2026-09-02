@@ -12,7 +12,54 @@ namespace {
 
 namespace Celer {
 	namespace Render {
+
+		void PipelineBuilder::createDescriptorLayout() {
+
+			mDescriptorSetLayoutBinding.push_back({});
+
+			//TEST FOR SAMPLERS, CHANGE TO ALLOW ADDING TO THE VECTOR VIA A HELPER FUNCTION
+			//For textures
+			mDescriptorSetLayoutBinding[0].binding = 0;
+			mDescriptorSetLayoutBinding[0].descriptorType = vk::DescriptorType::eCombinedImageSampler;
+			mDescriptorSetLayoutBinding[0].descriptorCount = 1; //CHANGE LATER, TEST OUT ARRAY OF TEXTURES
+			mDescriptorSetLayoutBinding[0].stageFlags = vk::ShaderStageFlagBits::eFragment;
+
+			//TODO FUCK IT ONLY HAVE ONE SET BUT DUPLICATE BASED ON FRAMES IN FLIGHT I GUESS
+			mDescriptorSetLayoutCreateInfo.pBindings = mDescriptorSetLayoutBinding.data();
+			mDescriptorSetLayoutCreateInfo.bindingCount = mDescriptorSetLayoutBinding.size();
+
+
+		}
+
+
+
+		void PipelineBuilder::createDescriptorWriteSet() {
+			
+
+
+
+		}
+
+		void PipelineBuilder::createDescriptorPool() {
+
+			mDescriptorPoolSize.push_back({});
+			mDescriptorPoolSize[0].type = vk::DescriptorType::eCombinedImageSampler;
+			mDescriptorPoolSize[0].descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT;
+
+			mDescriptorPoolCreateInfo.maxSets = MAX_FRAMES_IN_FLIGHT;
+			mDescriptorPoolCreateInfo.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
+			mDescriptorPoolCreateInfo.poolSizeCount = mDescriptorPoolSize.size(); //amount of size infos or vk::DescriptorPoolSize
+			mDescriptorPoolCreateInfo.pPoolSizes = mDescriptorPoolSize.data();
+
+
+		}
 		PipelineBuilder::PipelineBuilder() {
+
+
+			createDescriptorLayout();
+
+			createDescriptorPool();
+
 
 			/*DYNAMIC STATES---------------*/
 			mDynamicStates = std::vector<vk::DynamicState>{ vk::DynamicState::eViewport, vk::DynamicState::eScissor }; //This will cause the configuration of these values to be ignored, and you will be able (and required) to specify the data at drawing time

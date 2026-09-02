@@ -51,6 +51,7 @@ namespace Celer {
 
 
 
+				//for now completely synchronous upload (acquires are checked and added to pending acquires immediately)
 				for (ResourceUploadInfo& uploads : mPendingUpload) {
 
 					switch (uploads.mResourceType) {
@@ -132,7 +133,7 @@ namespace Celer {
 				mGraphicsCommandBuff.resetSingleBuff();
 				mGraphicsCommandBuff.beginSingleTimeCommand();
 
-				//TODO BATCH PIPELINE BARRIERS
+				//TODO BATCH PIPELINE BARRIERS (cuz pipelineBarrier has an overhead cost)
 
 				for (ResourceAcquireInfo& acquireInfo : mPendingAcquire) {
 
