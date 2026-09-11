@@ -1,5 +1,6 @@
 #include "celerEngine.hpp"
 #include "mesh.hpp"
+#include "descriptors.hpp"
 
 namespace Celer {
 
@@ -13,7 +14,8 @@ namespace Celer {
 			mUploadManager(mVulkanContext),
 			mMeshManager(mDeviceMemManager),
 			mTextureManager(mDeviceMemManager, mVulkanContext),
-			mFrameCtx(mVulkanContext)
+			mFrameCtx(mVulkanContext),
+			mDescriptorManager(*mVulkanContext.physicalDevice, mDeviceMemManager)
 		{
 
 			mWindow.setResizeEvent();
@@ -47,17 +49,18 @@ namespace Celer {
 		void CelerEngine::run() {
 
 
+			mTextureManager.addTexture("./assets/textures/viking_room.png", mVulkanContext, mUploadManager);
 			mTextureManager.addTexture("./assets/textures/eddieblanket_edge.png", mVulkanContext, mUploadManager);
+			
 
 			
 			mPipeline.updateDescriptorImage(*mVulkanContext.device, mTextureManager.getImageView(0), mTextureManager.mSampler, 0);
+			mPipeline.updateDescriptorImage(*mVulkanContext.device, mTextureManager.getImageView(1), mTextureManager.mSampler, 1);
 
-			//Wrapper::Buffer buffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, mVulkanContext);
-			//
+			mPipeline.updateBufferDescriptors<Geometry::GameObjectProperties>(*mVulkanContext.device, mDescriptorManager.mGameObjectPropsMemory, mDeviceMemManager.getDescriptorBuffer(), vk::DescriptorType::eStorageBuffer, 1);
 
-			//float2(0.0, -0.5),
-			//	float2(0.5, 0.5),
-			//	float2(-0.5, 0.5)
+			mPipeline.updateBufferDescriptors<Geometry::ViewProperties>(*mVulkanContext.device, mDescriptorManager.mViewPropsMemory, mDeviceMemManager.getDescriptorBuffer(), vk::DescriptorType::eUniformBuffer, 2);
+			
 			mMeshManager.addVertices({
 				{ glm::vec3(-1.5f, -0.5f,  5.0f), glm::vec3(1.f, 0.f, 0.f), glm::vec2(0.f, 1.f) }, // Bottom-Left
 				{ glm::vec3(-0.5f, -0.5f,  3.5f), glm::vec3(0.f, 1.f, 0.f), glm::vec2(1.f, 1.f) }, // Bottom-Right 
@@ -74,7 +77,7 @@ namespace Celer {
 
 			mMeshManager.submitIndices(mVulkanContext, false);
 
-
+			mGameObjectManager.addGameObject({ .transform = glm::mat4(1.f), .textureIdx = 0 } , { .textureIndex = 0, .meshIndex = 0 });
 
 			mDeviceMemManager.transferOwnership(mVulkanContext, mVulkanContext.transferQueueIdx, mVulkanContext.graphicsQueueIdx);
 
@@ -90,7 +93,7 @@ namespace Celer {
 
 				mUploadManager.update(mFrameCtx, mVulkanContext, mDeviceMemManager);
 
-				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline, mSwapchain, mWindow, mMeshManager, mDeviceMemManager, mFrameCtx, mPipeline.mDescriptorSets);
+				mRenderer.drawFrame(mVulkanContext, mSwapChainContext, mPipeline, mSwapchain, mWindow, mMeshManager, mDeviceMemManager, mFrameCtx, mPipeline.mDescriptorSets, mGameObjectManager, mDescriptorManager);
 				
 			}
 

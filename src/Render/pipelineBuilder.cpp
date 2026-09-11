@@ -13,38 +13,45 @@ namespace {
 namespace Celer {
 	namespace Render {
 
+		void PipelineBuilder::addDescriptorSetLayoutBinding(vk::DescriptorSetLayoutBinding const& binding) {
+			mDescriptorSetLayoutBinding.push_back(binding);
+		}
+
+		void PipelineBuilder::addDescriptorPoolSize(vk::DescriptorPoolSize const& size) {
+			mDescriptorPoolSize.push_back(size);
+		}
+
 		void PipelineBuilder::createDescriptorLayout() {
 
-			mDescriptorSetLayoutBinding.push_back({});
+			addDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = vk::DescriptorType::eCombinedImageSampler, .descriptorCount = 20, .stageFlags = vk::ShaderStageFlagBits::eFragment });
 
-			//TEST FOR SAMPLERS, CHANGE TO ALLOW ADDING TO THE VECTOR VIA A HELPER FUNCTION
-			//For textures
-			mDescriptorSetLayoutBinding[0].binding = 0;
-			mDescriptorSetLayoutBinding[0].descriptorType = vk::DescriptorType::eCombinedImageSampler;
-			mDescriptorSetLayoutBinding[0].descriptorCount = 1; //CHANGE LATER, TEST OUT ARRAY OF TEXTURES
-			mDescriptorSetLayoutBinding[0].stageFlags = vk::ShaderStageFlagBits::eFragment;
+			addDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = vk::DescriptorType::eStorageBuffer, .descriptorCount = 1, .stageFlags = vk::ShaderStageFlagBits::eVertex });
 
-			//TODO FUCK IT ONLY HAVE ONE SET BUT DUPLICATE BASED ON FRAMES IN FLIGHT I GUESS
+			addDescriptorSetLayoutBinding({ .binding = 2, .descriptorType = vk::DescriptorType::eUniformBuffer, .descriptorCount = 1, .stageFlags = vk::ShaderStageFlagBits::eVertex });
+
+			mBindingFlags[0] = vk::DescriptorBindingFlagBits::ePartiallyBound;
+
+			mBindingFlags[1] = vk::DescriptorBindingFlags{};
+
+			mBindingFlags[2] = vk::DescriptorBindingFlags{};
+
+			mFlagInfo = { .bindingCount = static_cast<uint32_t>(mBindingFlags.size()), .pBindingFlags = mBindingFlags.data() };
+
+
 			mDescriptorSetLayoutCreateInfo.pBindings = mDescriptorSetLayoutBinding.data();
 			mDescriptorSetLayoutCreateInfo.bindingCount = mDescriptorSetLayoutBinding.size();
-
-
-		}
-
-
-
-		void PipelineBuilder::createDescriptorWriteSet() {
-			
-
-
+			mDescriptorSetLayoutCreateInfo.pNext = &mFlagInfo;
 
 		}
+
 
 		void PipelineBuilder::createDescriptorPool() {
 
-			mDescriptorPoolSize.push_back({});
-			mDescriptorPoolSize[0].type = vk::DescriptorType::eCombinedImageSampler;
-			mDescriptorPoolSize[0].descriptorCount = 1 * MAX_FRAMES_IN_FLIGHT;
+			addDescriptorPoolSize({ .type = vk::DescriptorType::eCombinedImageSampler, .descriptorCount = mDescriptorSetLayoutBinding[0].descriptorCount * MAX_FRAMES_IN_FLIGHT });
+
+			addDescriptorPoolSize({ .type = vk::DescriptorType::eStorageBuffer, .descriptorCount = mDescriptorSetLayoutBinding[1].descriptorCount * MAX_FRAMES_IN_FLIGHT });
+
+			addDescriptorPoolSize({ .type = vk::DescriptorType::eUniformBuffer, .descriptorCount = mDescriptorSetLayoutBinding[2].descriptorCount * MAX_FRAMES_IN_FLIGHT });
 
 			mDescriptorPoolCreateInfo.maxSets = MAX_FRAMES_IN_FLIGHT;
 			mDescriptorPoolCreateInfo.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
@@ -65,6 +72,7 @@ namespace Celer {
 			mDynamicStates = std::vector<vk::DynamicState>{ vk::DynamicState::eViewport, vk::DynamicState::eScissor }; //This will cause the configuration of these values to be ignored, and you will be able (and required) to specify the data at drawing time
 			mDynamicState = vk::PipelineDynamicStateCreateInfo { .dynamicStateCount = static_cast<uint32_t>(mDynamicStates.size()), .pDynamicStates = mDynamicStates.data() };
 			
+			//Vertex attribute
 			auto attributeDesc{ Geometry::Vertex::getAttributeDescription() };
 			mVertexAttrDesc.resize(attributeDesc.size());
 			std::copy(attributeDesc.begin(), attributeDesc.end(), mVertexAttrDesc.begin());
@@ -72,7 +80,7 @@ namespace Celer {
 			mVertexBindingDesc = Geometry::Vertex::getBindingDescription();
 
 			/*Push Constants*/
-			pushConsts = vk::PushConstantRange{ .stageFlags = vk::ShaderStageFlagBits::eVertex, .offset = 0, .size = sizeof(glm::mat4) };
+			pushConsts = vk::PushConstantRange{ .stageFlags = vk::ShaderStageFlagBits::eVertex, .offset = 0, .size = sizeof(uint32_t)};
 
 			/*Vertex input*/
 			mVertexInputInfo = vk::PipelineVertexInputStateCreateInfo{.vertexBindingDescriptionCount = 1, .pVertexBindingDescriptions = &mVertexBindingDesc, .vertexAttributeDescriptionCount = static_cast<uint32_t>(mVertexAttrDesc.size()), .pVertexAttributeDescriptions = mVertexAttrDesc.data() };

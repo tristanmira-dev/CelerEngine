@@ -8,9 +8,9 @@ namespace Celer {
 
 	namespace Core {
 
-		void releaseBarrier(Celer::Wrapper::CommandBuffer& commandBuff, vk::raii::Image& img, uint32_t oldQueue, uint32_t newQueue);
+		void releaseBarrier(Celer::Wrapper::CommandBuffer& commandBuff, vk::Image img, uint32_t oldQueue, uint32_t newQueue);
 
-		void transitionLayout(Celer::Wrapper::CommandBuffer& commandBuff, vk::raii::Image& img, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+		void transitionLayout(Celer::Wrapper::CommandBuffer& commandBuff, vk::Image img, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
 
 		class FrameContext {
 			
@@ -28,6 +28,7 @@ namespace Celer {
 					vk::raii::Semaphore mSemaphore = nullptr;
 				};
 
+				//Catch if gpu is processing draw jobs
 				SemaphoreObject mFrameSyncObject;
 				uint64_t mTimelineCount{};
 

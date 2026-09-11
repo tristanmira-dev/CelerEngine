@@ -17,19 +17,14 @@ namespace Celer {
 
 				vk::DescriptorImageInfo imageInfo{ .sampler = sampler, .imageView = imageView, .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal };
 
+				vk::WriteDescriptorSet descriptorWrites{ .dstSet = mDescriptorSets[i], .dstBinding = 0, .dstArrayElement = idx, .descriptorCount = 1, .descriptorType = vk::DescriptorType::eCombinedImageSampler, .pImageInfo = &imageInfo };
 
-				vk::WriteDescriptorSet writeSet{ .dstArrayElement = idx, .descriptorCount = 1 };
-
-				writeSet.dstSet = mDescriptorSets[i];
-				writeSet.dstBinding = 0;
-
-				writeSet.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-				writeSet.pImageInfo = &imageInfo;
-				
-				device.updateDescriptorSets(writeSet, {});
+				device.updateDescriptorSets(descriptorWrites, {});
 
 			}
 		}
+
+		
 
 		void Pipeline::setPipeline(PipelineBuilder &pipelineBuilder, vk::raii::Device &device, vk::SurfaceFormatKHR& swapchainSurfaceFormat) {
 			vk::PipelineLayoutCreateInfo layoutCreateInfo{ .pSetLayouts = nullptr ,.pushConstantRangeCount = 1, .pPushConstantRanges = &pipelineBuilder.pushConsts };

@@ -160,7 +160,43 @@ namespace Celer {
 		template class ImageCollection<vk::Image>;
 
 
-	}
+		//ImageCollectionRefactor::ImageCollectionRefactor(ImageCollectionRefactor&& src) noexcept {
+
+		//	mImage.resize(src.mImage.size());
+		//	mImageView.resize(src.mImageView.size());
+
+		//	std::size_t sizeImage{ src.mImage.size() };
+		//	for (int i{}; i < sizeImage; ++i) {
+		//		mImage[i] = std::move(src.mImage[i]);
+		//		src.mImage[i] = nullptr;
+		//	}
+
+		//	std::size_t sizeImageView{ src.mImageView.size() };
+		//	for (int i{}; i < sizeImageView; ++i) {
+		//		mImageView[i] = std::move(src.mImageView[i]);
+		//		src.mImageView[i] = nullptr;
+		//	}
+
+		//}
+
+		//ImageCollectionRefactor& ImageCollectionRefactor::operator=(ImageCollectionRefactor&& src) noexcept {
+		//	mImage.resize(src.mImage.size());
+		//	mImageView.resize(src.mImageView.size());
+
+		//	std::size_t sizeImage{ src.mImage.size() };
+		//	for (int i{}; i < sizeImage; ++i) {
+		//		mImage[i] = std::move(src.mImage[i]);
+		//		src.mImage[i] = nullptr;
+		//	}
+
+		//	std::size_t sizeImageView{ src.mImageView.size() };
+		//	for (int i{}; i < sizeImageView; ++i) {
+		//		mImageView[i] = std::move(src.mImageView[i]);
+		//		src.mImageView[i] = nullptr;
+		//	}
+		//}
+
+}
 
 }
 

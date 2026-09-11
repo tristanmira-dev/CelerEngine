@@ -48,13 +48,22 @@ namespace Celer {
 
 		void* Buffer::mapMemory() {
 			assert(mIsMapped == false && "WARNING, DOUBLE MAPPING!");
+
+			if (mIsMapped) return nullptr;
+
 			mIsMapped = true;
 			return mVkDeviceMemory.mapMemory(0, mSize);
 		
 		}
 
 		void Buffer::unmapMemory() {
-			assert(mIsMapped == true && "WARNING, DOUBLE UNMAPPING!");
+			//assert(mIsMapped == true && "WARNING, DOUBLE UNMAPPING!");
+
+			if (!mIsMapped) return;
+
+			mIsMapped = false;
+
+			if (mVkDeviceMemory != nullptr)
 			mVkDeviceMemory.unmapMemory();
 		}
 

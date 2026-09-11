@@ -1,10 +1,14 @@
 #include "renderer.hpp"
 #include "pipeline.hpp"
 #include "common.hpp"
+#include "gameObjectManager.hpp"
 
 namespace Celer {
 	namespace Render {
-		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager &meshManager, Core::DeviceMemoryManager& memManager, Core::FrameContext &frameCtx, std::vector<vk::raii::DescriptorSet>& descriptor) {
+
+		void updateDescriptorBuffers(Core::Window& window, uint32_t frameIndex, Core::DeviceMemoryManager& deviceMemoryManager, Managers::Descriptors& descriptorManager, Managers::GameObjectManager& gameObjectManager);
+
+		void Renderer::drawFrame(Core::VulkanContext &vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline &pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager &meshManager, Core::DeviceMemoryManager& memManager, Core::FrameContext &frameCtx, std::vector<vk::raii::DescriptorSet>& descriptor, Managers::GameObjectManager& gameObjectManager, Managers::Descriptors &descriptorManager) {
 
 			auto fenceResult{ vulkanCtx.device->waitForFences(*mFenceCollection[mCurrentFrameIdx], vk::True, UINT64_MAX) };
 
@@ -29,6 +33,7 @@ namespace Celer {
 
 			//updateUniformBuffer(frameIdx);
 
+			//TODO DELEGATE TO UPLOAD MANAGER
 			if (memManager.getMainBuffOwner() != vulkanCtx.graphicsQueueIdx) {
 				memManager.mainBuffAcquireQueueOwnership(mCommandBuffer, mCurrentFrameIdx, memManager.getMainBuffOwner(), vulkanCtx.graphicsQueueIdx, *vulkanCtx.graphicsQueue, mTransferFence);
 				vulkanCtx.device->waitForFences(*mTransferFence, vk::True, UINT64_MAX);
@@ -36,9 +41,9 @@ namespace Celer {
 				mCommandBuffer.getCommandBuffer(mCurrentFrameIdx).reset();
 			}
 
+			updateDescriptorBuffers(window, mCurrentFrameIdx, memManager, descriptorManager, gameObjectManager);
+
 			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager, window, descriptor);
-
-
 
 			frameCtx.mTimelineCount++;
 
@@ -178,17 +183,31 @@ namespace Celer {
 
 			glm::mat4 proj = Geometry::projection(window, 100.f, 0.1f, 100.f);
 			currentCommandBuff.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline.getPipeline());
-			currentCommandBuff.pushConstants<glm::mat4>(*pipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0, proj);
-			currentCommandBuff.bindVertexBuffers(0, meshManager.getUnderlyingBuffer(), {meshManager.getVertexMemoryInfo().getOffset()});
+
+
+			currentCommandBuff.setViewport(0, vk::Viewport(0.f, 0.f, static_cast<float>(swapchainCtx.swapchainExtent->width), static_cast<float>(swapchainCtx.swapchainExtent->height), 0.f, 1.f));
+			currentCommandBuff.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), *swapchainCtx.swapchainExtent));
+
+			currentCommandBuff.bindVertexBuffers(0, meshManager.getUnderlyingBuffer(), { meshManager.getVertexMemoryInfo().getOffset() });
 			currentCommandBuff.bindIndexBuffer(meshManager.getUnderlyingBuffer(), { meshManager.getIndicesMemoryInfo().getOffset() }, vk::IndexType::eUint32);
 			currentCommandBuff.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.getLayout(), 0, *descriptorSet[mCurrentFrameIdx], {});
+
+			//amount of gameobjects
+			for (uint32_t i{}; i < 1 /*PLACEHOLDER*/; ++i) {
+
+				currentCommandBuff.pushConstants<uint32_t>(*pipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0, i);
+				currentCommandBuff.drawIndexed(meshManager.getIndicesCount(), 1, 0, 0, 0);
+
+			}
+
+
+			
 
 			//currentCommandBuff.bindVertexBuffers(0, *vertexBuffer, { 0 });
 			//currentCommandBuff.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, *descriptorSets[frameIdx], nullptr);
 			//currentCommandBuff.bindIndexBuffer(*indexBuffer, 0, vk::IndexType::eUint32);
 
-			currentCommandBuff.setViewport(0, vk::Viewport(0.f, 0.f, static_cast<float>(swapchainCtx.swapchainExtent->width), static_cast<float>(swapchainCtx.swapchainExtent->height), 0.f, 1.f));
-			currentCommandBuff.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), *swapchainCtx.swapchainExtent));
+			
 
 
 			//size_t totalGameObjsP{ gameObjects.gameObjInfoCollection.size() };
@@ -198,7 +217,6 @@ namespace Celer {
 			//}
 
 			//currentCommandBuff.draw(meshManager.getVertexCount(), 1, 0, 0);
-			currentCommandBuff.drawIndexed(meshManager.getIndicesCount(), 1, 0, 0, 0);
 
 
 			currentCommandBuff.endRendering();
@@ -251,9 +269,40 @@ namespace Celer {
 			}
 
 		}
-	}
+
+
+
+		void updateDescriptorBuffers(Core::Window& window, uint32_t frameIndex, Core::DeviceMemoryManager& deviceMemoryManager, Managers::Descriptors& descriptorManager, Managers::GameObjectManager& gameObjectManager) {
+			//deviceMemoryManager.addToMappedMemory()
+
+			
+			//View properties
+			Geometry::ViewProperties viewProps{ .projection = Geometry::projection(window, 70.f, 0.1, 100.f), .model = glm::mat4(1), .view = glm::mat4(1) };
+
+			uint8_t* viewPropertyMemLocation{ deviceMemoryManager.getDescriptorMappedMemory(descriptorManager.mViewPropsMemory[frameIndex].getOffset()) };
+
+			memcpy(viewPropertyMemLocation, &viewProps, sizeof(viewProps));
+			
+			uint8_t* gameObjectMemLocation{ deviceMemoryManager.getDescriptorMappedMemory(descriptorManager.mGameObjectPropsMemory[frameIndex].getOffset()) };
+
+			memcpy(gameObjectMemLocation, gameObjectManager.mGameObjectProps.data(), sizeof(Geometry::GameObjectProperties) * gameObjectManager.mGameObjectProps.size());
+
+			//descriptorManager.mViewPropsMemory
+
+
+
+
+		}
+
+}
+
+
 	
 }
+
+
+
+
 
 
 /*

@@ -11,6 +11,19 @@ namespace Celer {
 		//}
 
 
+		uint8_t* DeviceMemoryManager::getDescriptorMappedMemory(uint32_t offset) {
+
+
+			uint8_t* memory{ static_cast<uint8_t*>(mDescriptorMappedBuff) };
+
+			return memory + offset;
+
+		}
+
+		vk::Buffer DeviceMemoryManager::getDescriptorBuffer() {
+			return mDescriptorBuffer.getBuffer();
+		}
+
 		void DeviceMemoryManager::batchUpload(VulkanContext& vulkanCtx, Memory const& memory, std::size_t dataSize) {
 		
 			mCommandBuffer.getSingleBuffer().copyBuffer(mStagingBuffer.getBuffer(), mMainBuffer.getBuffer(), vk::BufferCopy(0, memory.getOffset(), dataSize));
@@ -147,11 +160,16 @@ namespace Celer {
 		DeviceMemoryManager::DeviceMemoryManager(Core::VulkanContext& vulkanCtx) :
 			mMainBufferSize{ 1024 * 1024 * 500 },
 			mMainBuffer(Wrapper::Buffer::createDeviceLocalBuffer(mMainBufferSize, vulkanCtx, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eUniformBuffer)),
-			mMappedStagingBuff{ mStagingBuffer.mapMemory() },
 			mStagingBuffer(1024 * 1024 * 64, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx),
+			mMappedStagingBuff{ mStagingBuffer.mapMemory() },
+
+			mDescriptorBuffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eStorageBuffer, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx),
+			mDescriptorMappedBuff{ mDescriptorBuffer.mapMemory() },
+
 			mTransferQueue{ *vulkanCtx.transferQueue },
 			mTransferQueueIdx{ vulkanCtx.transferQueueIdx },
-			mCommandBuffer(*vulkanCtx.device, 1, vulkanCtx.transferQueueIdx)
+			mCommandBuffer(*vulkanCtx.device, 1, vulkanCtx.transferQueueIdx),
+			mCurrentMainBufferSize{mMainBufferSize}
 		
 		{
 			mMainBuffer.setQueueOwner(mTransferQueueIdx);

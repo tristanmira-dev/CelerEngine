@@ -15,7 +15,7 @@ namespace Celer {
 											   .imageExtent = {uploadInfo.mWidth, uploadInfo.mHeight, 1
 			} };
 
-			commandBuffer.getSingleBuffer().copyBufferToImage(uploadInfo.mBuffer.getUnderlyingBuffer(), *uploadInfo.mImageResource, vk::ImageLayout::eTransferDstOptimal, region);
+			commandBuffer.getSingleBuffer().copyBufferToImage(uploadInfo.mBuffer.getUnderlyingBuffer(), uploadInfo.mImageResource, vk::ImageLayout::eTransferDstOptimal, region);
 		
 		}
 
@@ -34,6 +34,7 @@ namespace Celer {
 
 			if (mPendingUpload.size()) {
 
+				//Catch things mid frame
 				if (frameCtx.mTimelineCount != frameCtx.mFrameSyncObject.mSemaphore.getCounterValue()) {
 					std::cout << "UNSYNCED!!! " << frameCtx.mTimelineCount << " " << frameCtx.mFrameSyncObject.mSemaphore.getCounterValue() << '\n';
 
@@ -61,11 +62,11 @@ namespace Celer {
 
 						vk::raii::CommandBuffer& commandBuff{ mCommandBuff.getSingleBuffer() };
 
-						transitionLayout(mCommandBuff, *uploads.mImageResource, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+						transitionLayout(mCommandBuff, uploads.mImageResource, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
 						copyBufferToImage(mCommandBuff, uploads);
 
-						releaseBarrier(mCommandBuff, *uploads.mImageResource, ctx.transferQueueIdx, ctx.graphicsQueueIdx);
+						releaseBarrier(mCommandBuff, uploads.mImageResource, ctx.transferQueueIdx, ctx.graphicsQueueIdx);
 
 						addAcquire(ResourceAcquireInfo{
 							.oldQueue = ctx.transferQueueIdx,
@@ -145,7 +146,7 @@ namespace Celer {
 						.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
 						.srcQueueFamilyIndex = ctx.transferQueueIdx,
 						.dstQueueFamilyIndex = ctx.graphicsQueueIdx,
-						.image = **acquireInfo.mImageResource,
+						.image = acquireInfo.mImageResource,
 					};
 
 					imgMemory.subresourceRange = { .aspectMask = vk::ImageAspectFlagBits::eColor, .levelCount = 1, .layerCount = 1 };
@@ -172,11 +173,11 @@ namespace Celer {
 
 		}
 
-		void UploadManager::addImageResource(VulkanContext& vulkanCtx, ResourceType resourceType, Memory memoryInfo, void* data, vk::raii::Image *image, uint32_t width, uint32_t height) {
+		void UploadManager::addImageResource(VulkanContext& vulkanCtx, ResourceType resourceType, Memory memoryInfo, void* data, vk::Image image, uint32_t width, uint32_t height) {
 			switch (resourceType) {
 				case ResourceType::IMAGE:
 					
-					mPendingUpload.emplace_back(resourceType, memoryInfo, data, vulkanCtx, image, nullptr, width, height);
+					mPendingUpload.emplace_back(resourceType, memoryInfo, data, vulkanCtx, image, VK_NULL_HANDLE, width, height);
 					break;
 
 				case ResourceType::BUFFER:
@@ -192,7 +193,7 @@ namespace Celer {
 		
 		}
 
-		ResourceUploadInfo::ResourceUploadInfo(ResourceType resourceType, Memory memory, void* data, VulkanContext& ctx, vk::raii::Image* image, vk::raii::Buffer* buffer, uint32_t width, uint32_t height) : mResourceType{ resourceType }, mMemoryInfo{ memory }, mBuffer(data, memory.getSize(), ctx), mImageResource{ image }, mBufferResource{ buffer }, mWidth{ width }, mHeight{ height } {
+		ResourceUploadInfo::ResourceUploadInfo(ResourceType resourceType, Memory memory, void* data, VulkanContext& ctx, vk::Image image, vk::Buffer buffer, uint32_t width, uint32_t height) : mResourceType{ resourceType }, mMemoryInfo{ memory }, mBuffer(data, memory.getSize(), ctx), mImageResource{ image }, mBufferResource{ buffer }, mWidth{ width }, mHeight{ height } {
 			
 		
 		}

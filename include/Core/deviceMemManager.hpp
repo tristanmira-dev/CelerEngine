@@ -13,12 +13,15 @@ namespace Celer {
 
 
 		class Memory {
+
 			private:
+
 				uint32_t mOffset;
 				uint32_t mSize; //in bytes
 				bool mIsFree{ true };
 
 			public:
+
 				Memory() = default;
 				
 				Memory(uint32_t offset, uint32_t size, bool isFree) : mOffset{ offset }, mSize{ size }, mIsFree{ isFree } {}
@@ -30,6 +33,7 @@ namespace Celer {
 				inline uint32_t getOffset() const {
 					return mOffset;
 				}
+
 		};
 
 
@@ -42,13 +46,17 @@ namespace Celer {
 
 				uint32_t mMainBufferSize;
 
-
 				/*Linear buffers*/
 				Wrapper::Buffer mMainBuffer;
 				Wrapper::Buffer mStagingBuffer;
 				void* mMappedStagingBuff;
 
 				std::list<Memory> mMemoryTracker; //Separate user defined class later probably (the logic for memory alloc)
+
+
+				Wrapper::Buffer mDescriptorBuffer;
+				void* mDescriptorMappedBuff;
+				std::list<Memory> mDescriptorMemoryTracker;
 
 				/*Queue*/
 				vk::raii::Queue& mTransferQueue;
@@ -62,10 +70,16 @@ namespace Celer {
 				vk::raii::DeviceMemory mImageDeviceMemory{ nullptr };
 				std::list<Memory> mImageMemoryTracker;
 
-				
+
+				uint32_t mCurrentMainBufferSize;
 
 
 			public:
+
+				uint8_t* getDescriptorMappedMemory(uint32_t offset);
+
+				vk::Buffer getDescriptorBuffer();
+				
 				void batchUpload(VulkanContext& vulkanCtx, Memory const& memory, std::size_t dataSize);
 
 				void createImageDeviceBuffer(VulkanContext& vulkanCtx, vk::DeviceSize deviceSize);
@@ -96,16 +110,43 @@ namespace Celer {
 				template<typename T>
 				Memory allocateMemory(uint32_t size) {
 
+
 					if (mMemoryTracker.size() == 0) {
 						mMemoryTracker.push_back(Memory{ 0, size, false });
+						mCurrentMainBufferSize -= size;
 						return mMemoryTracker.back();
 
 					}
 
 					Memory backIter{ mMemoryTracker.back() };
 
+
+					mCurrentMainBufferSize -= size;
+
+					assert(mCurrentMainBufferSize > 0 && "WARNING, OUT OF MEMORY!");
 					mMemoryTracker.push_back(Memory{ getAlignedOffset(backIter.getOffset() + backIter.getSize(), alignof(T)), size, false });
 					return mMemoryTracker.back();
+
+				}
+
+
+				template<typename T>
+				Memory allocateDescriptorMemory(vk::raii::PhysicalDevice& device, uint32_t size) {
+
+					
+
+					if (mDescriptorMemoryTracker.size() == 0) {
+						mDescriptorMemoryTracker.push_back(Memory{ 0, size, false });
+						return mDescriptorMemoryTracker.back();
+
+					}
+
+					Memory backIter{ mDescriptorMemoryTracker.back() };
+
+					//assert(mCurrentMainBufferSize > 0 && "WARNING, OUT OF MEMORY!");
+					mDescriptorMemoryTracker.push_back(Memory{ getAlignedOffset(backIter.getOffset() + backIter.getSize(), device.getProperties().limits.minUniformBufferOffsetAlignment), size, false });
+
+					return mDescriptorMemoryTracker.back();
 
 				}
 
@@ -122,6 +163,14 @@ namespace Celer {
 					mImageMemoryTracker.push_back(Memory{ getAlignedOffset(backIter.getOffset() + backIter.getSize(), alignment), size, false });
 					return mImageMemoryTracker.back();
 
+				}
+
+				template<typename Iterable>
+				void addToMappedMemory(Iterable& container, uint32_t offset) {
+					
+					uint8_t* cvtBytePointer = dynamic_cast<uint8_t*>(mDescriptorMappedBuff);
+
+					memcpy(cvtBytePointer + offset, container.data(), container.size() * sizeof(*container.begin()));
 				}
 
 				template<typename Iterable>

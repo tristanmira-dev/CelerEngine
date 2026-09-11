@@ -49,15 +49,12 @@ namespace Celer {
 
 			vk::MemoryRequirements imageMemReq{ mImageCollection.back().getImageMemoryReq() };
 
-			
-
-
 			mMemory.push_back(mDeviceMemoryManager.allocateImageMemory(imageMemReq.size, imageMemReq.alignment));
 
 			assert(mMemory.back().getSize() == imageMemReq.size && "WARNING, DIFFERENT MEMORY FROM THE IMAGE MEM REQUIREMENT");
 
 			//ADD ACTUAL UPLOAD REQUEST TO QUEUE(NOT ANY GRAPHICS QUEUE, UPLOAD MANAGER'S PENDING UPLOADS)
-			uploadManager.addImageResource(ctx, Core::ResourceType::IMAGE, mMemory.back(), static_cast<void*>(pixels), &mImageCollection.back().imageRef(), texWidth, texHeight);
+			uploadManager.addImageResource(ctx, Core::ResourceType::IMAGE, mMemory.back(), static_cast<void*>(pixels), *mImageCollection.back().getImage(), texWidth, texHeight);
 
 			/*align*/
 

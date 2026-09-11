@@ -7,6 +7,8 @@
 #include "mesh.hpp"
 #include "pipeline.hpp"
 #include "sync.hpp"
+#include "gameObjectManager.hpp"
+#include "descriptorManager.hpp"
 
 namespace Celer {
 
@@ -33,7 +35,7 @@ namespace Celer {
 			public:
 				Renderer() = default;
 
-				void drawFrame(Core::VulkanContext& vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager& meshManager, Core::DeviceMemoryManager& memManager, Core::FrameContext& frameCtx, std::vector<vk::raii::DescriptorSet>& descriptor);
+				void drawFrame(Core::VulkanContext& vulkanCtx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Core::Swapchain& swapchain, Core::Window& window, Geometry::MeshManager& meshManager, Core::DeviceMemoryManager& memManager, Core::FrameContext& frameCtx, std::vector<vk::raii::DescriptorSet>& descriptor, Managers::GameObjectManager& gameObjectManager, Managers::Descriptors& descriptorManager);
 				void init(Core::SwapchainContext& swapchainCtx, Core::VulkanContext& vulkanCtx);
 				static constexpr uint32_t MAX_FRAMES_IN_FLIGHT{ 2 };
 

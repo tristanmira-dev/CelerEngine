@@ -5,14 +5,15 @@
 #include "window.hpp"
 #include "contexts.hpp"
 #include "swapchain.hpp"
-#include "pipelineBuilder.hpp"
 #include "pipeline.hpp"
-#include "commandBuffer.hpp"
 #include "renderer.hpp"
 #include "deviceMemManager.hpp"
 #include "mesh.hpp"
 #include "texturemanager.hpp"
 #include "sync.hpp"
+#include "descriptorManager.hpp"
+#include "gameObjectManager.hpp"
+
 
 #include "uploadManager.hpp"
 
@@ -48,6 +49,9 @@ namespace Celer {
 
 				FrameContext mFrameCtx;
 
+				Managers::Descriptors mDescriptorManager;
+
+				Managers::GameObjectManager mGameObjectManager;
 
 				/*Private Functions*/
 

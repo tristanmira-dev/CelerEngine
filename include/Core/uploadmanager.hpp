@@ -19,8 +19,8 @@ namespace Celer {
 		struct ResourceAcquireInfo {
 			uint32_t oldQueue;
 			uint32_t newQueue;
-			vk::raii::Image* mImageResource = nullptr;
-			vk::raii::Buffer* mBufferResource = nullptr;
+			vk::Image mImageResource;
+			vk::Buffer mBufferResource;
 		};
 
 		//TODO ADD A MEMBER TO SPECIFY WHICH QUEUE WILL USE THE RESOURCE
@@ -28,12 +28,12 @@ namespace Celer {
 			ResourceType mResourceType;
 			Memory mMemoryInfo;
 			Wrapper::BufferStagingResource<stbi_uc> mBuffer;
-			vk::raii::Image* mImageResource = nullptr;
-			vk::raii::Buffer* mBufferResource = nullptr;
+			vk::Image mImageResource;
+			vk::Buffer mBufferResource;
 			uint32_t mWidth;
 			uint32_t mHeight;
 
-			ResourceUploadInfo(ResourceType resourceType, Memory memory, void* data, VulkanContext& ctx, vk::raii::Image* image = nullptr, vk::raii::Buffer* buffer = nullptr, uint32_t width = 0, uint32_t height = 0);
+			ResourceUploadInfo(ResourceType resourceType, Memory memory, void* data, VulkanContext& ctx, vk::Image image, vk::Buffer buffer, uint32_t width, uint32_t height);
 		};
 
 		
@@ -66,7 +66,7 @@ namespace Celer {
 				void update(FrameContext& frameCtx, VulkanContext& ctx, DeviceMemoryManager& memoryManager);
 
 
-				void addImageResource(VulkanContext& vulkanCtx, ResourceType resourceType, Memory memoryInfo, void* data, vk::raii::Image* image, uint32_t width, uint32_t height);
+				void addImageResource(VulkanContext& vulkanCtx, ResourceType resourceType, Memory memoryInfo, void* data, vk::Image image, uint32_t width, uint32_t height);
 
 
 

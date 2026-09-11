@@ -4,7 +4,7 @@
 namespace Celer {
 
 	namespace Core {
-		void releaseBarrier(Celer::Wrapper::CommandBuffer& commandBuff, vk::raii::Image& img, uint32_t oldQueue, uint32_t newQueue) {
+		void releaseBarrier(Celer::Wrapper::CommandBuffer& commandBuff, vk::Image img, uint32_t oldQueue, uint32_t newQueue) {
 			vk::ImageMemoryBarrier imageBarrier{ .oldLayout=vk::ImageLayout::eTransferDstOptimal ,.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal, .image = img };
 			imageBarrier.srcQueueFamilyIndex = oldQueue;
 			imageBarrier.dstQueueFamilyIndex = newQueue;
@@ -18,7 +18,7 @@ namespace Celer {
 		
 		}
 
-		void transitionLayout(Celer::Wrapper::CommandBuffer& commandBuff, vk::raii::Image& img, vk::ImageLayout oldLayout, vk::ImageLayout newLayout) {
+		void transitionLayout(Celer::Wrapper::CommandBuffer& commandBuff, vk::Image img, vk::ImageLayout oldLayout, vk::ImageLayout newLayout) {
 			vk::ImageMemoryBarrier imageBarrier{};
 			vk::PipelineStageFlags src{};
 			vk::PipelineStageFlags dst{};

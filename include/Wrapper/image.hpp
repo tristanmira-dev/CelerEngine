@@ -7,6 +7,33 @@ namespace Celer {
 
 		//const vk::Format TEXTURE_FORMAT{};
 
+		
+
+		class ImageCollectionRefactor {
+
+			private:
+				std::vector<vk::raii::Image> mImage;
+				std::vector<vk::raii::ImageView> mImageView;
+			public:
+
+				
+				ImageCollectionRefactor() = default;
+
+				//DELETE THESE COPY ASSIGNMENT AND COPY CONSTRUCTORS CUZ OF RAII ELEMENTS OF STD VECTOR
+				ImageCollectionRefactor(ImageCollectionRefactor const& src) = delete;
+				ImageCollectionRefactor& operator=(ImageCollectionRefactor const& src) = delete;
+
+				//MOVE CONSTRUCTOR AND MOVE ASSIGNMENT
+				ImageCollectionRefactor(ImageCollectionRefactor &&src) noexcept;
+				ImageCollectionRefactor& operator=(ImageCollectionRefactor&& src) noexcept;
+
+
+				~ImageCollectionRefactor() = default;
+
+				//SETTER
+
+		};
+
 		template<typename ImageType>
 		class Image {
 			private:
@@ -83,6 +110,16 @@ namespace Celer {
 
 
 
+		class RaiiImage {
+			private:
+				vk::raii::Image mImage{ nullptr };
+				vk::raii::ImageView mImageView{ nullptr };
+			public:
+				RaiiImage() = default;
+
+				//RaiiImage();
+
+		};
 
 
 	}

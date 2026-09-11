@@ -43,11 +43,15 @@ set(WRAPPER_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Wrapper)
 set(GEOMETRY_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Geometry)
 set(GEOMETRY_DIR ${CMAKE_SOURCE_DIR}/src/Geometry)
 
+set(MANAGERS_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Managers)
+set(MANAGERS_DIR ${CMAKE_SOURCE_DIR}/src/Managers)
+
 #include directories
 target_include_directories(mainTarget PRIVATE ${CORE_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${RENDER_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${WRAPPER_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${GEOMETRY_HEADER_DIR})
+target_include_directories(mainTarget PRIVATE ${MANAGERS_HEADER_DIR})
 
 #defines----------------------------------------------------------------------------------------
 target_compile_definitions(mainTarget PRIVATE VULKAN_HPP_NO_STRUCT_CONSTRUCTORS) #CPP 20 feature
@@ -84,6 +88,8 @@ target_sources( mainTarget PRIVATE
     ${WRAPPER_DIR}/vulkanBuffer.cpp
     ${GEOMETRY_DIR}/mesh.cpp
     ${GEOMETRY_DIR}/common.cpp
+    ${MANAGERS_DIR}/descriptorManager.cpp
+    ${MANAGERS_DIR}/gameObjectManager.cpp
 )
 
 target_sources( mainTarget PRIVATE 
@@ -96,6 +102,7 @@ target_sources( mainTarget PRIVATE
     ${CORE_HEADER_DIR}/swapchain.hpp
     ${CORE_HEADER_DIR}/deviceMemManager.hpp
     ${CORE_HEADER_DIR}/uploadManager.hpp
+    ${CORE_HEADER_DIR}/commonTypes.hpp
     ${RENDER_HEADER_DIR}/pipeline.hpp
     ${RENDER_HEADER_DIR}/pipelineBuilder.hpp
     ${RENDER_HEADER_DIR}/render_types.hpp
@@ -107,6 +114,9 @@ target_sources( mainTarget PRIVATE
     ${GEOMETRY_HEADER_DIR}/vertex.hpp
     ${GEOMETRY_HEADER_DIR}/mesh.hpp
     ${GEOMETRY_HEADER_DIR}/common.hpp
+    ${GEOMETRY_HEADER_DIR}/descriptors.hpp
+    ${MANAGERS_HEADER_DIR}/descriptorManager.hpp
+    ${MANAGERS_HEADER_DIR}/gameObjectManager.hpp
 )
 
 #dependencies------------------------------------------------------------------------------------

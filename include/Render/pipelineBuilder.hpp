@@ -17,6 +17,9 @@ namespace Celer {
 
 				void createDescriptorWriteSet();
 
+				void addDescriptorSetLayoutBinding(vk::DescriptorSetLayoutBinding const& binding);
+				void addDescriptorPoolSize(vk::DescriptorPoolSize const& size);
+
 			public:
 
 				vk::raii::ShaderModule mShaderModule{ nullptr };
@@ -73,6 +76,11 @@ namespace Celer {
 
 
 				vk::DescriptorPoolCreateInfo mDescriptorPoolCreateInfo;
+
+				std::array<vk::DescriptorBindingFlags, 3> mBindingFlags;
+
+				vk::DescriptorSetLayoutBindingFlagsCreateInfo mFlagInfo;
+
 
 				/*Member functions*/
 
