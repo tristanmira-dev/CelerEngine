@@ -12,7 +12,7 @@ namespace Celer {
 
 		}
 
-		void Pipeline::updateDescriptorImage(vk::raii::Device &device, vk::raii::ImageView& imageView, vk::raii::Sampler& sampler, uint32_t idx) {
+		void Pipeline::updateDescriptorImage(vk::raii::Device &device, vk::raii::ImageView const& imageView, vk::raii::Sampler& sampler, uint32_t idx) {
 			for (int i{}; i < MAX_FRAMES_IN_FLIGHT; ++i) {
 
 				vk::DescriptorImageInfo imageInfo{ .sampler = sampler, .imageView = imageView, .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal };

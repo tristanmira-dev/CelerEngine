@@ -277,7 +277,7 @@ namespace Celer {
 
 			
 			//View properties
-			Geometry::ViewProperties viewProps{ .projection = Geometry::projection(window, 70.f, 0.1, 100.f), .model = glm::mat4(1), .view = glm::mat4(1) };
+			Geometry::ViewProperties viewProps{ .projection = Geometry::projection(window, 70.f, 0.1, 100.f), .model = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -2.f)), .view = glm::mat4(1)};
 
 			uint8_t* viewPropertyMemLocation{ deviceMemoryManager.getDescriptorMappedMemory(descriptorManager.mViewPropsMemory[frameIndex].getOffset()) };
 

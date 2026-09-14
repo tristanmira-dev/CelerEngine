@@ -12,12 +12,13 @@ namespace Celer {
 				Core::DeviceMemoryManager& mDeviceMemoryManager;
 				//Wrapper::OwnedImage mImage;
 				Wrapper::CommandBuffer mCommandBuff;
-				Wrapper::OwnedImageCollection mImageCollection;
+				//Wrapper::OwnedImageCollection mImageCollection;
+				Wrapper::ImageCollectionRefactor mImageCollection;
 				std::vector<Core::Memory> mMemory;
 
 			public:
 
-				vk::raii::ImageView& getImageView(uint32_t idx);
+				vk::raii::ImageView const& getImageView(uint32_t idx);
 
 				vk::raii::Sampler mSampler = nullptr;
 

@@ -25,7 +25,7 @@ namespace Celer {
 
 				std::vector<vk::raii::DescriptorSet> mDescriptorSets;
 
-				void updateDescriptorImage(vk::raii::Device& device, vk::raii::ImageView& imageView, vk::raii::Sampler& sampler, uint32_t idx);
+				void updateDescriptorImage(vk::raii::Device& device, vk::raii::ImageView const& imageView, vk::raii::Sampler& sampler, uint32_t idx);
 
 
 				template<typename T>

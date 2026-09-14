@@ -3,11 +3,28 @@
 namespace Celer {
 
 	namespace Wrapper {
+		vk::raii::CommandBuffer& CommandBuffer::operator[](std::size_t index) {
+			return mCommandBuffers[index];
+		}
 		void CommandBuffer::resetSingleBuff() {
-
 			mCommandBuffers[0].reset();
+		}
+
+		CommandBuffer::CommandBuffer(CommandBuffer&& commandBuffer) noexcept {
+			mCommandPool = std::move(commandBuffer.mCommandPool);
+			mCommandBuffers = std::move(commandBuffer.mCommandBuffers);
 
 		}
+
+		CommandBuffer& CommandBuffer::operator=(CommandBuffer&& commandBuffer) noexcept {
+			mCommandPool = std::move(commandBuffer.mCommandPool);
+			mCommandBuffers = std::move(commandBuffer.mCommandBuffers);
+			return *this;
+		}
+
+
+
+
 		CommandBuffer::CommandBuffer(vk::raii::Device &device, uint32_t count, uint32_t queueFamilyIdx, vk::CommandBufferLevel bufferLevel) {
 			
 			vk::CommandPoolCreateInfo poolInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = queueFamilyIdx};
@@ -19,6 +36,10 @@ namespace Celer {
 
 			mCommandBuffers = vk::raii::CommandBuffers(device, commandBuffersInfo);
 			
+		}
+
+		vk::raii::CommandBuffer& CommandBuffer::getCommandBuffer(uint32_t idx) {
+			return mCommandBuffers[idx];
 		}
 
 		void CommandBuffer::beginSingleTimeCommand() {
@@ -55,7 +76,7 @@ namespace Celer {
 		void CommandBuffer::endSingleTimeCommand(vk::raii::Queue& queue, vk::raii::Semaphore* semaphore) {
 			mCommandBuffers[0].end();
 
-			vk::SubmitInfo submitInfo{ .commandBufferCount = 1, .pCommandBuffers = &**mCommandBuffers.begin() /*holy this monstrosity*/ };
+			vk::SubmitInfo submitInfo{ .commandBufferCount = 1, .pCommandBuffers = &**mCommandBuffers.begin() };
 
 			queue.submit(submitInfo);
 

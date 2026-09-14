@@ -14,14 +14,22 @@ namespace Celer {
 				
 			public:
 
-				void resetSingleBuff();
-				
 				CommandBuffer() = default;
+				~CommandBuffer() = default;
+
+				/*Move Constructor && Move assignment*/
+				CommandBuffer(CommandBuffer&& commandBuffer) noexcept;
+				CommandBuffer& operator=(CommandBuffer&& commandBuffer) noexcept;
+				//
+
+				/*Parametarized constructor*/
 				CommandBuffer(vk::raii::Device& device, uint32_t count, uint32_t queueFamilyIdx, vk::CommandBufferLevel bufferLevel = vk::CommandBufferLevel::ePrimary);
 
-				inline vk::raii::CommandBuffer& getCommandBuffer(uint32_t idx) {
-					return mCommandBuffers[idx];
-				}
+				vk::raii::CommandBuffer& getCommandBuffer(uint32_t idx);
+
+				vk::raii::CommandBuffer& operator[](std::size_t index);
+
+				void resetSingleBuff();
 
 				void beginSingleTimeCommand();
 

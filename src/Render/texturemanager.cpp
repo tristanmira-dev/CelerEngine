@@ -8,8 +8,9 @@ namespace {
 
 namespace Celer {
 	namespace Render {
-		vk::raii::ImageView& TextureManager::getImageView(uint32_t idx) {
-			return mImageCollection.getImage(idx).mImageView;
+
+		vk::raii::ImageView const& TextureManager::getImageView(uint32_t idx) {
+			return mImageCollection[idx].getImageView();
 		}
 
 		TextureManager::TextureManager(Core::DeviceMemoryManager& deviceManager, Core::VulkanContext& ctx) : mDeviceMemoryManager{ deviceManager }, mCommandBuff(*ctx.device, 1, ctx.transferQueueIdx) {
@@ -43,7 +44,8 @@ namespace Celer {
 
 			vk::Format format{ vk::Format::eR8G8B8A8Srgb };
 
-			mImageCollection.addOwnedImage(format, *ctx.device, vk::Extent3D{ static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1 }, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled);
+			mImageCollection.addImage(format, *ctx.device, vk::Extent3D{ static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1 }, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled);
+
 
 			vk::DeviceSize imageSize = texWidth * texHeight * 4;
 

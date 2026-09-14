@@ -98,7 +98,7 @@ namespace Celer {
 		}
 
 
-		void DeviceMemoryManager::bindImage(vk::raii::Image& img, Memory const& memory) {
+		void DeviceMemoryManager::bindImage(vk::raii::Image const& img, Memory const& memory) {
 			img.bindMemory(mImageDeviceMemory, memory.getOffset());
 		}
 

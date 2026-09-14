@@ -40,9 +40,7 @@ namespace Celer {
 		class DeviceMemoryManager {
 			private:
 
-
-
-				vk::raii::Fence mTransferFence{ nullptr };
+				vk::raii::Fence mTransferFence{ nullptr }; //In progress to REMOVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! OFFLOAD TO UPLOAD MANAGER!
 
 				uint32_t mMainBufferSize;
 
@@ -50,26 +48,29 @@ namespace Celer {
 				Wrapper::Buffer mMainBuffer;
 				Wrapper::Buffer mStagingBuffer;
 				void* mMappedStagingBuff;
-
 				std::list<Memory> mMemoryTracker; //Separate user defined class later probably (the logic for memory alloc)
+				//
 
-
+				/*Descriptor buffers*/
 				Wrapper::Buffer mDescriptorBuffer;
 				void* mDescriptorMappedBuff;
 				std::list<Memory> mDescriptorMemoryTracker;
+				//
 
 				/*Queue*/
 				vk::raii::Queue& mTransferQueue;
 				uint32_t mTransferQueueIdx;
+				//
 
-				/*Sync Objects*/
+				/*Sync Objects -- TODO, REMOVE LATER, OFFLOAD THIS TO THE UPLOAD MANAGER*/
 				Wrapper::CommandBuffer mCommandBuffer;
 				vk::raii::Semaphore mTransferFinished{ nullptr };
+				//
 
 				/*Non-linear buffers*/
 				vk::raii::DeviceMemory mImageDeviceMemory{ nullptr };
 				std::list<Memory> mImageMemoryTracker;
-
+				//
 
 				uint32_t mCurrentMainBufferSize;
 
@@ -102,7 +103,7 @@ namespace Celer {
 					return mMainBuffer.getBuffer();
 				}
 
-				void bindImage(vk::raii::Image& img, Memory const& memory);
+				void bindImage(vk::raii::Image const& img, Memory const& memory);
 				
 
 				void transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize, bool endOfBatch = true);

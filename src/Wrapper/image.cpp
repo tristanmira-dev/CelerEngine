@@ -83,7 +83,7 @@ namespace Celer {
 			vk::DependencyInfo dependencyInfo{
 				.dependencyFlags = {},
 				.imageMemoryBarrierCount = 1,
-				.pImageMemoryBarriers = &imageTransitionAndWait /* "everything before this barrier must finish before anything after it can start.", The layout transition is the barrier */
+				.pImageMemoryBarriers = &imageTransitionAndWait
 			};
 
 			commandBuff.pipelineBarrier2(dependencyInfo);
@@ -160,43 +160,100 @@ namespace Celer {
 		template class ImageCollection<vk::Image>;
 
 
-		//ImageCollectionRefactor::ImageCollectionRefactor(ImageCollectionRefactor&& src) noexcept {
+		ImageCollectionRefactor::ImageCollectionRefactor(ImageCollectionRefactor&& src) noexcept : mImageCollection{ std::move(src.mImageCollection) } { /*EMPTY BY DESIGN*/ }
 
-		//	mImage.resize(src.mImage.size());
-		//	mImageView.resize(src.mImageView.size());
+		ImageCollectionRefactor& ImageCollectionRefactor::operator=(ImageCollectionRefactor&& src) noexcept {
 
-		//	std::size_t sizeImage{ src.mImage.size() };
-		//	for (int i{}; i < sizeImage; ++i) {
-		//		mImage[i] = std::move(src.mImage[i]);
-		//		src.mImage[i] = nullptr;
-		//	}
+			if (this == &src) return *this; //Check if the moving the same object
 
-		//	std::size_t sizeImageView{ src.mImageView.size() };
-		//	for (int i{}; i < sizeImageView; ++i) {
-		//		mImageView[i] = std::move(src.mImageView[i]);
-		//		src.mImageView[i] = nullptr;
-		//	}
+			mImageCollection = std::move(src.mImageCollection);
 
-		//}
+			return *this;
+		}
 
-		//ImageCollectionRefactor& ImageCollectionRefactor::operator=(ImageCollectionRefactor&& src) noexcept {
-		//	mImage.resize(src.mImage.size());
-		//	mImageView.resize(src.mImageView.size());
+		RaiiImage& ImageCollectionRefactor::operator[](std::size_t idx) {
+			return mImageCollection[idx];
+		}
 
-		//	std::size_t sizeImage{ src.mImage.size() };
-		//	for (int i{}; i < sizeImage; ++i) {
-		//		mImage[i] = std::move(src.mImage[i]);
-		//		src.mImage[i] = nullptr;
-		//	}
+		std::size_t ImageCollectionRefactor::size() {
+			return mImageCollection.size();
+		}
 
-		//	std::size_t sizeImageView{ src.mImageView.size() };
-		//	for (int i{}; i < sizeImageView; ++i) {
-		//		mImageView[i] = std::move(src.mImageView[i]);
-		//		src.mImageView[i] = nullptr;
-		//	}
-		//}
+		RaiiImage& ImageCollectionRefactor::back() {
+			return mImageCollection.back();
+		}
 
-}
+		void ImageCollectionRefactor::addImage(vk::Format format, vk::raii::Device& device, vk::Extent3D extents, vk::ImageTiling tiling, vk::ImageUsageFlags usage) {
+			
+			vk::ImageCreateInfo imageCreateInfo{
+				.imageType = vk::ImageType::e2D,
+				.format = format,
+				.extent = extents,
+				.mipLevels = 1,
+				.arrayLayers = 1,
+				.samples = vk::SampleCountFlagBits::e1,
+				.tiling = tiling,
+				.usage = usage,
+				.sharingMode = vk::SharingMode::eExclusive
+			};
+
+			vk::raii::Image image(device, imageCreateInfo);
+
+			mImageCollection.emplace_back(std::move(image), nullptr);
+
+		}
+
+		RaiiImage::RaiiImage(RaiiImage&& image) noexcept : mImage{ std::move(image.mImage) }, mImageView{ std::move(image.mImageView) } { /*EMPTY BY DESIGN*/ }
+
+		RaiiImage& RaiiImage::operator=(RaiiImage&& image) noexcept {
+
+			if (this == &image) return *this; //Check if the moving the same object
+
+			mImage = std::move(image.mImage);
+			mImageView = std::move(image.mImageView);
+
+			return *this;
+
+		}
+
+		RaiiImage::RaiiImage(vk::raii::Image&& image, vk::raii::ImageView&& imageView) noexcept : mImage{ std::move(image) }, mImageView{ std::move(imageView) } { /*EMPTY BY DESIGN*/ }
+
+		RaiiImage::RaiiImage(vk::raii::Image&& image) noexcept : mImage{ std::move(image) } { /*EMPTY BY DESIGN*/ }
+
+		void RaiiImage::setImageView(vk::raii::Device& device, vk::Format format) {
+			vk::ImageViewCreateInfo imageViewCreateInfo{
+				.image = *mImage,
+				.viewType = vk::ImageViewType::e2D,
+				.format = format,
+				.subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor, .baseMipLevel = 0, .levelCount = 1, .baseArrayLayer = 0, .layerCount = 1}
+			};
+
+			mImageView = vk::raii::ImageView(device, imageViewCreateInfo);
+		}
+
+		void RaiiImage::setImageView(vk::raii::Device& device, vk::ImageViewCreateInfo&& createInfo) {
+
+			createInfo.image = *mImage;
+
+			mImageView = vk::raii::ImageView(device, createInfo);
+
+		}
+
+		vk::raii::Image const& RaiiImage::getImage() {
+			return mImage;
+		}
+
+		vk::raii::ImageView const& RaiiImage::getImageView() {
+			return mImageView;
+		}
+
+		vk::MemoryRequirements RaiiImage::getImageMemoryReq() {
+			return mImage.getMemoryRequirements();
+		}
+
+
+
+	}
 
 }
 

@@ -41,7 +41,7 @@ struct VertexOutput {
 [shader("vertex")]
 VertexOutput vertMain(VSInput input) {
     VertexOutput output;
-    output.sv_position =  mul(viewProperties.projection, float4(input.position,1) );
+    output.sv_position =  mul(viewProperties.projection, mul(viewProperties.model,float4(input.position,1)) );
     output.color = input.color;
     output.uv = input.uv;
     output.textureIdx = gameObjectProperties[pushConst.gameObjectIdx].textureIdx;
