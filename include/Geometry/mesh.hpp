@@ -7,6 +7,11 @@
 namespace Celer {
 	namespace Geometry {
 
+		struct MeshInfo {
+			uint32_t offset;
+			uint32_t indicesCount;
+		};
+
 		class MeshManager {
 			private:
 				Core::DeviceMemoryManager& mMemManager;
@@ -15,12 +20,22 @@ namespace Celer {
 				Core::Memory mAllocatedVertexMem;
 				Core::Memory mAllocatedIndicesMem;
 
+				std::vector<MeshInfo> mMeshInfo;
+
 			public:
+
 				vk::Buffer getUnderlyingBuffer();
+
 				MeshManager(Core::DeviceMemoryManager& memManager);
+
+				MeshInfo getMeshInfo(uint32_t idx);
+
+				/*OFFLOAD THIS TO THE UPLOAD MANAGER!*/
 				void addVertices(std::initializer_list<Vertex>&& initList);
 				void submitMesh(Core::VulkanContext& vulkanCtx, bool endOfBatch = true);
 				void submitIndices(Core::VulkanContext& vulkanCtx, bool endOfBatch = true);
+				/*---------------------------------------------------------------*/
+
 				inline uint32_t getVertexCount() {
 					return mLocalVerticesData.size();
 				}

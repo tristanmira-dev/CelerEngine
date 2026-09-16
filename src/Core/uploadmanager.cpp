@@ -20,7 +20,7 @@ namespace Celer {
 		}
 
 
-		UploadManager::UploadManager(VulkanContext &vulkanContext) : mCommandBuff(*vulkanContext.device, 1, vulkanContext.transferQueueIdx), mGraphicsCommandBuff(*vulkanContext.device, 1, vulkanContext.graphicsQueueIdx) {
+		UploadManager::UploadManager(VulkanContext &vulkanContext) : mTransferCommandBuff(*vulkanContext.device, 1, vulkanContext.transferQueueIdx), mGraphicsCommandBuff(*vulkanContext.device, 1, vulkanContext.graphicsQueueIdx) {
 			mUploadFence = vk::raii::Fence(*vulkanContext.device, vk::FenceCreateInfo{ .flags = vk::FenceCreateFlagBits::eSignaled });
 		}
 
@@ -46,9 +46,9 @@ namespace Celer {
 
 				}
 
-				mCommandBuff.getSingleBuffer().reset();
+				mTransferCommandBuff.getSingleBuffer().reset();
 
-				mCommandBuff.beginSingleTimeCommand();
+				mTransferCommandBuff.beginSingleTimeCommand();
 
 
 
@@ -60,13 +60,13 @@ namespace Celer {
 					case ResourceType::IMAGE: {
 						//reset command buffer first....
 
-						vk::raii::CommandBuffer& commandBuff{ mCommandBuff.getSingleBuffer() };
+						vk::raii::CommandBuffer& commandBuff{ mTransferCommandBuff.getSingleBuffer() };
 
-						transitionLayout(mCommandBuff, uploads.mImageResource, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+						transitionLayout(mTransferCommandBuff, uploads.mImageResource, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
-						copyBufferToImage(mCommandBuff, uploads);
+						copyBufferToImage(mTransferCommandBuff, uploads);
 
-						releaseBarrier(mCommandBuff, uploads.mImageResource, ctx.transferQueueIdx, ctx.graphicsQueueIdx);
+						releaseBarrier(mTransferCommandBuff, uploads.mImageResource, ctx.transferQueueIdx, ctx.graphicsQueueIdx);
 
 						addAcquire(ResourceAcquireInfo{
 							.oldQueue = ctx.transferQueueIdx,
@@ -89,7 +89,7 @@ namespace Celer {
 					}
 				}
 
-				mCommandBuff.getSingleBuffer().end();
+				mTransferCommandBuff.getSingleBuffer().end();
 
 				frameCtx.mUploadCount++;
 
@@ -103,7 +103,7 @@ namespace Celer {
 
 
 				vk::CommandBufferSubmitInfo commandBuffInfo{
-					.commandBuffer = *mCommandBuff.getSingleBuffer()
+					.commandBuffer = *mTransferCommandBuff.getSingleBuffer()
 				};
 
 				const vk::SubmitInfo2 submitInfo{

@@ -43,7 +43,7 @@ namespace Celer {
 
 			updateDescriptorBuffers(window, mCurrentFrameIdx, memManager, descriptorManager, gameObjectManager);
 
-			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager, window, descriptor);
+			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager, window, descriptor, gameObjectManager);
 
 			frameCtx.mTimelineCount++;
 
@@ -112,7 +112,7 @@ namespace Celer {
 		}
 
 
-		void Renderer::recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager& meshManager, Core::Window &window, std::vector<vk::raii::DescriptorSet>& descriptorSet) {
+		void Renderer::recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager& meshManager, Core::Window &window, std::vector<vk::raii::DescriptorSet>& descriptorSet, Managers::GameObjectManager& gameObjectManager) {
 			vk::raii::CommandBuffer& currentCommandBuff{ mCommandBuffer.getCommandBuffer(mCurrentFrameIdx) };
 
 			auto& swapChainImg{ swapchainCtx.swapChainImages->getImage(imageIdx) };
@@ -193,10 +193,10 @@ namespace Celer {
 			currentCommandBuff.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.getLayout(), 0, *descriptorSet[mCurrentFrameIdx], {});
 
 			//amount of gameobjects
-			for (uint32_t i{}; i < 1 /*PLACEHOLDER*/; ++i) {
+			for (uint32_t i{}; i < gameObjectManager.mGameObjectProps.size() /*PLACEHOLDER*/; ++i) {
 
 				currentCommandBuff.pushConstants<uint32_t>(*pipeline.getLayout(), vk::ShaderStageFlagBits::eVertex, 0, i);
-				currentCommandBuff.drawIndexed(meshManager.getIndicesCount(), 1, 0, 0, 0);
+				currentCommandBuff.drawIndexed(meshManager.getMeshInfo(gameObjectManager.mAssetInformation[i].meshIndex).indicesCount, 1, meshManager.getMeshInfo(gameObjectManager.mAssetInformation[i].meshIndex).offset, 0, 0);
 
 			}
 

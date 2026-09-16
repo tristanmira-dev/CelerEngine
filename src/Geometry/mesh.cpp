@@ -11,6 +11,10 @@ namespace Celer {
 			mAllocatedIndicesMem = mMemManager.allocateMemory<uint32_t>(1024 * 1024 * 100);
 		}
 
+		MeshInfo MeshManager::getMeshInfo(uint32_t idx) {
+			return mMeshInfo[idx];
+		}
+
 		void MeshManager::addVertices(std::initializer_list<Vertex> &&initList) {
 			std::copy(initList.begin(), initList.end(), std::back_inserter(mLocalVerticesData));
 			//mLocalVerticesData.push_back(Vertex{ glm::vec3{1.f, 1.f, 1.f}, glm::vec3{0.f,0.f,0.f}, glm::vec2{1.f, 1.f} });
@@ -18,6 +22,14 @@ namespace Celer {
 
 		void MeshManager::addIndices(std::initializer_list<uint32_t>&& initList) {
 			std::copy(initList.begin(), initList.end(), std::back_inserter(mLocalIndexData));
+
+			if (!mMeshInfo.size()) mMeshInfo.push_back(MeshInfo{ .offset = 0, .indicesCount = static_cast<uint32_t>(initList.size()) });
+			else {
+
+				MeshInfo info{ mMeshInfo.back() };
+				mMeshInfo.push_back(MeshInfo{ .offset = info.offset + info.indicesCount, .indicesCount = static_cast<uint32_t>(initList.size()) });
+
+			}
 			//mLocalVerticesData.push_back(Vertex{ glm::vec3{1.f, 1.f, 1.f}, glm::vec3{0.f,0.f,0.f}, glm::vec2{1.f, 1.f} });
 		}
 

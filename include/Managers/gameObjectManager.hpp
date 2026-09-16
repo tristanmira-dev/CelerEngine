@@ -8,7 +8,6 @@ namespace Celer {
 	namespace Managers {
 
 		struct AssetInformation {
-			uint32_t textureIndex;
 			uint32_t meshIndex;
 		};
 		

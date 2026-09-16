@@ -4,7 +4,7 @@
 namespace Celer {
     namespace Geometry {
         struct GameObjectProperties {
-            glm::mat4 transform;
+            alignas(16) glm::mat4 transform;
             uint32_t textureIdx;
         };
 

@@ -45,12 +45,12 @@ namespace Celer {
 				std::vector<ResourceUploadInfo> mPendingUpload;
 				std::vector<ResourceAcquireInfo> mPendingAcquire;
 
-
-				Wrapper::CommandBuffer mCommandBuff;
-
+				Wrapper::CommandBuffer mTransferCommandBuff;
 				Wrapper::CommandBuffer mGraphicsCommandBuff;
 
 				vk::raii::Fence mUploadFence = nullptr;
+
+
 
 				void addAcquire(ResourceAcquireInfo const& info);
 
@@ -65,6 +65,7 @@ namespace Celer {
 
 				void update(FrameContext& frameCtx, VulkanContext& ctx, DeviceMemoryManager& memoryManager);
 
+				void addBufferResource(VulkanContext& vulkanCtx, ResourceType resourceType, Memory memoryInfo, vk::Buffer buffer);
 
 				void addImageResource(VulkanContext& vulkanCtx, ResourceType resourceType, Memory memoryInfo, void* data, vk::Image image, uint32_t width, uint32_t height);
 

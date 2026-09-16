@@ -20,7 +20,7 @@ namespace Celer {
 
 
 
-				void recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager &meshManager, Core::Window &window, std::vector<vk::raii::DescriptorSet> &descriptor);
+				void recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager &meshManager, Core::Window &window, std::vector<vk::raii::DescriptorSet> &descriptor, Managers::GameObjectManager& gameObjectManager);
 
 
 				Wrapper::CommandBuffer mCommandBuffer;

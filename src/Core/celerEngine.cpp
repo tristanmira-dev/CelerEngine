@@ -77,7 +77,10 @@ namespace Celer {
 
 			mMeshManager.submitIndices(mVulkanContext, false);
 
-			mGameObjectManager.addGameObject({ .transform = glm::mat4(1.f), .textureIdx = 0 } , { .textureIndex = 0, .meshIndex = 0 });
+			mGameObjectManager.addGameObject({ .transform = glm::mat4(1.f), .textureIdx = 1 } , { .meshIndex = 0 });
+			mGameObjectManager.addGameObject({ .transform = glm::translate(glm::mat4(1.f), glm::vec3(3.f, 0.f, 0.f)), .textureIdx = 1 }, { .meshIndex = 0 });
+			mGameObjectManager.addGameObject({ .transform = glm::translate(glm::mat4(1.f), glm::vec3(5.f, 2.f, 4.f)), .textureIdx = 1 }, { .meshIndex = 0 });
+
 
 			mDeviceMemManager.transferOwnership(mVulkanContext, mVulkanContext.transferQueueIdx, mVulkanContext.graphicsQueueIdx);
 

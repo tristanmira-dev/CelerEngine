@@ -69,6 +69,7 @@ namespace Celer {
 		template<typename T>
 		class BufferStagingResource {
 			private:
+
 				uint32_t mBufferSize{};
 				std::vector<T> mStagingBuffer;
 
