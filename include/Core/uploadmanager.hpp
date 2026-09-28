@@ -50,7 +50,7 @@ namespace Celer {
 
 				vk::raii::Fence mUploadFence = nullptr;
 
-
+				Wrapper::BufferStagingResource<uint8_t> mSharedStagingBuffer;
 
 				void addAcquire(ResourceAcquireInfo const& info);
 

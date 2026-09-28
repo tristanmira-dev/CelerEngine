@@ -1,7 +1,7 @@
 ~~1. Actually finish descriptor sets for samplers~~
 2. Depth buffers 
 3. Fix allocator or make it into an abstraction (class)
-4. migrate vertex upload to upload manager
+4. migrate vertex upload to upload manager -> IN_PROGRESS
 5. look more into the inefficiencies of having separate descriptor sets for resources
 ~~6. yep, need more descriptors lol, for the uniform buffers and structured buffers at least, added a method and modified the pool creation, just need to integrate another set of buffers for the custom allocator~~
 ~~7. ok, next session, i need to finish the updateDescriptors, at least for the projection matrix which should be simple if things go well. i might have to do some finagling or design a way for the gameObject side to get texture and mesh data?~~

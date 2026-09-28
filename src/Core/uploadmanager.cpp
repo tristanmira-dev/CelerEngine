@@ -1,4 +1,5 @@
 #include "uploadmanager.hpp"
+#include "commonTypes.hpp"
 
 
 namespace Celer {
@@ -20,7 +21,7 @@ namespace Celer {
 		}
 
 
-		UploadManager::UploadManager(VulkanContext &vulkanContext) : mTransferCommandBuff(*vulkanContext.device, 1, vulkanContext.transferQueueIdx), mGraphicsCommandBuff(*vulkanContext.device, 1, vulkanContext.graphicsQueueIdx) {
+		UploadManager::UploadManager(VulkanContext &vulkanContext) : mTransferCommandBuff(*vulkanContext.device, 1, vulkanContext.transferQueueIdx), mGraphicsCommandBuff(*vulkanContext.device, 1, vulkanContext.graphicsQueueIdx), mSharedStagingBuffer(KILO * KILO * 100, vulkanContext) {
 			mUploadFence = vk::raii::Fence(*vulkanContext.device, vk::FenceCreateInfo{ .flags = vk::FenceCreateFlagBits::eSignaled });
 		}
 

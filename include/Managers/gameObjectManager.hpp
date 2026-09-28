@@ -13,8 +13,6 @@ namespace Celer {
 		
 		class GameObjectManager {
 
-			
-
 			public:
 				std::vector<Geometry::GameObjectProperties> mGameObjectProps;
 				std::vector<AssetInformation> mAssetInformation;

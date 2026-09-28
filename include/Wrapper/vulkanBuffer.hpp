@@ -18,7 +18,7 @@ namespace Celer {
 				vk::raii::Buffer mVkBuffer{ nullptr };
 				vk::raii::DeviceMemory mVkDeviceMemory{ nullptr };
 
-				uint32_t mQueueOwner{ static_cast<uint32_t>(~0) };
+				uint32_t mQueueOwner{ static_cast<uint32_t>(~0) }; //Might just remove, or keep for tracking purposes
 
 				bool mIsMapped{ false };
 
@@ -60,6 +60,17 @@ namespace Celer {
 				}
 
 
+
+
+		};
+
+		/*TODO!!!!!!!!!!!!!!!!!!!!------------------------------------------------------*/
+		template<uint32_t size>
+		class StaticStagingResource {
+			private:
+				std::array<uint8_t, size> mBufferData;
+			public:
+				Wrapper::Buffer mStagingBuffer;
 
 
 		};
@@ -106,6 +117,12 @@ namespace Celer {
 					
 					
 					copyBufferToLocal();
+				}
+
+				BufferStagingResource(uint32_t byteSize, Core::VulkanContext& vulkanCtx) : mBufferSize{byteSize} {
+					
+					mBuffer = Buffer(mBufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx);
+					mStagingBuffer.resize(byteSize);
 				}
 
 				void initVulkanBuffer(Core::VulkanContext vulkanCtx, vk::BufferUsageFlags bufferUsage) {
