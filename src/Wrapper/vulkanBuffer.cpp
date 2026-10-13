@@ -2,24 +2,26 @@
 #include <cassert>
 
 namespace Celer {
-	namespace Wrapper {
-		uint32_t Buffer::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties, vk::raii::PhysicalDevice& physicalDevice) {
-			vk::PhysicalDeviceMemoryProperties memProperties{ physicalDevice.getMemoryProperties() };
+	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties, vk::raii::PhysicalDevice& physicalDevice) {
+		vk::PhysicalDeviceMemoryProperties memProperties{ physicalDevice.getMemoryProperties() };
 
-			for (uint32_t i{}; i < memProperties.memoryTypeCount; i++) {
-				if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-					return i;
-				}
+		for (uint32_t i{}; i < memProperties.memoryTypeCount; i++) {
+			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+				return i;
 			}
-
-
-			throw std::runtime_error("Fresh outta luck pal, no memory types are available for u!");
 		}
 
 
+		throw std::runtime_error("Fresh outta luck pal, no memory types are available for u!");
+	}
 
-		Buffer Buffer::createDeviceLocalBuffer(vk::DeviceSize deviceSize, Core::VulkanContext vulkanCtx, vk::BufferUsageFlags flags) {
-			return Buffer(deviceSize, flags, vk::MemoryPropertyFlagBits::eDeviceLocal, vulkanCtx);
+	namespace Wrapper {
+		void Buffer::unmapMemory() {
+			mVkDeviceMemory.unmapMemory();
+		}
+
+		void* Buffer::mapMemory(uint32_t offset, vk::MemoryMapFlags const& memoryMapFlags) {
+			return mVkDeviceMemory.mapMemory(offset, mSize, memoryMapFlags);
 		}
 
 		Buffer::Buffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const& ctx) : mSize{size} {
@@ -28,10 +30,10 @@ namespace Celer {
 
 			vk::MemoryRequirements memRequirements{ mVkBuffer.getMemoryRequirements() }; /*Get mem reqs of buffer, find the appropriate memory in the device*/
 
-			std::cout << memRequirements.alignment << " ALIGNMENT!!!\n";
+			std::cout << "\n" << memRequirements.alignment << " ALIGNMENT!!!\n";
 
 
-			std::cout << memRequirements.size << " SIZE!!!\n";
+			std::cout << memRequirements.size << " SIZE!!!\n\n";
 
 			vk::MemoryAllocateInfo allocInfo{ .allocationSize = memRequirements.size, .memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, props, *ctx.physicalDevice) /*Get the memory type that satisfies the buffer in the previous step*/ };
 
@@ -40,45 +42,20 @@ namespace Celer {
 			mVkBuffer.bindMemory(*mVkDeviceMemory, 0);
 		}
 
-		Buffer::Buffer(Buffer&& src) noexcept : mSize{ src.mSize }, mVkBuffer{ std::move(src.mVkBuffer) }, mVkDeviceMemory{ std::move(src.mVkDeviceMemory) }, mQueueOwner{ src.mQueueOwner }  {
-			src.mVkBuffer = nullptr;
-			src.mVkDeviceMemory = nullptr;
-		
+		vk::Buffer Buffer::getBuffer() const {
+			return *mVkBuffer;
 		}
 
-		void* Buffer::mapMemory() {
-			assert(mIsMapped == false && "WARNING, DOUBLE MAPPING!");
-
-			if (mIsMapped) return nullptr;
-
-			mIsMapped = true;
-			return mVkDeviceMemory.mapMemory(0, mSize);
-		
+		vk::DeviceSize Buffer::getSize() const {
+			return mSize;
 		}
 
-		void Buffer::unmapMemory() {
-			//assert(mIsMapped == true && "WARNING, DOUBLE UNMAPPING!");
-
-			if (!mIsMapped) return;
-
-			mIsMapped = false;
-
-			if (mVkDeviceMemory != nullptr)
-			mVkDeviceMemory.unmapMemory();
+		uint32_t Buffer::getQueueOwner() const {
+			return mQueueOwner;
 		}
 
-		void Buffer::operator=(Buffer&& src) noexcept {
-
-
-			mSize = src.mSize;
-			mVkBuffer = std::move(src.mVkBuffer);
-			mVkDeviceMemory = std::move(src.mVkDeviceMemory);
-			mQueueOwner = src.mQueueOwner;
-
-
-			src.mVkBuffer = nullptr;
-			src.mVkDeviceMemory = nullptr;
-
+		void Buffer::setQueueOwner(uint32_t newOwner) {
+			mQueueOwner = newOwner;
 		}
 
 	}

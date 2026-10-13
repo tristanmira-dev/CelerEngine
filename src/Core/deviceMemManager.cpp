@@ -59,7 +59,7 @@ namespace Celer {
 			vk::MemoryRequirements imgReq{ tempImg.getMemoryRequirements() };
 
 			vk::MemoryAllocateInfo memoryInfo{ .allocationSize = deviceSize,
-										 .memoryTypeIndex = Wrapper::Buffer::findMemoryType(imgReq.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal, *vulkanCtx.physicalDevice) };
+										 .memoryTypeIndex = findMemoryType(imgReq.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal, *vulkanCtx.physicalDevice) };
 			
 			mImageDeviceMemory = vk::raii::DeviceMemory(*vulkanCtx.device, memoryInfo);
 		}
@@ -159,12 +159,12 @@ namespace Celer {
 
 		DeviceMemoryManager::DeviceMemoryManager(Core::VulkanContext& vulkanCtx) :
 			mMainBufferSize{ 1024 * 1024 * 500 },
-			mMainBuffer(Wrapper::Buffer::createDeviceLocalBuffer(mMainBufferSize, vulkanCtx, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eUniformBuffer)),
-			mStagingBuffer(1024 * 1024 * 64, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx),
-			mMappedStagingBuff{ mStagingBuffer.mapMemory() },
+			mMainBuffer(mMainBufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, vulkanCtx),
+			mStagingBuffer(1024 * 1024 * 64, vulkanCtx),
+			mMappedStagingBuff{ mStagingBuffer.getMappedMemory() },
 
-			mDescriptorBuffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eStorageBuffer, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx),
-			mDescriptorMappedBuff{ mDescriptorBuffer.mapMemory() },
+			mDescriptorBuffer(1024 * 1024 * 500, vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eStorageBuffer, vulkanCtx),
+			mDescriptorMappedBuff{ mDescriptorBuffer.getMappedMemory() },
 
 			mTransferQueue{ *vulkanCtx.transferQueue },
 			mTransferQueueIdx{ vulkanCtx.transferQueueIdx },
@@ -194,7 +194,6 @@ namespace Celer {
 
 		DeviceMemoryManager::~DeviceMemoryManager() {
 			
-			mStagingBuffer.unmapMemory();
 		
 		}
 

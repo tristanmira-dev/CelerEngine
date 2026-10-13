@@ -4,8 +4,10 @@
 
 
 #include "deviceMemManager.hpp"
+#include "stagingBuffer.hpp"
 #include "sync.hpp"
 #include <stb_image.h>
+#include <memory>
 
 namespace Celer {
 
@@ -27,7 +29,7 @@ namespace Celer {
 		struct ResourceUploadInfo {
 			ResourceType mResourceType;
 			Memory mMemoryInfo;
-			Wrapper::BufferStagingResource<stbi_uc> mBuffer;
+			Wrapper::StagingBuffer<std::uint8_t> mBuffer;
 			vk::Image mImageResource;
 			vk::Buffer mBufferResource;
 			uint32_t mWidth;
@@ -37,6 +39,26 @@ namespace Celer {
 		};
 
 		
+		class UploadableResource {
+			public:
+				virtual ~UploadableResource() = default;
+				UploadableResource() = default;
+				UploadableResource(UploadableResource const&) = delete;
+				UploadableResource& operator=(UploadableResource const&) = delete;
+
+				virtual void upload(vk::raii::CommandBuffer& commandBuff) = 0;
+		};
+
+		class UploadableImage : public UploadableResource {
+			private:
+				uint32_t mWidth;
+				uint32_t mHeight;
+				Wrapper::StagingBuffer<std::uint8_t> mBuffer;
+
+			public:
+				~UploadableImage();
+				virtual void upload(vk::raii::CommandBuffer& commandBuff) override;
+		};
 
 
 
@@ -50,7 +72,7 @@ namespace Celer {
 
 				vk::raii::Fence mUploadFence = nullptr;
 
-				Wrapper::BufferStagingResource<uint8_t> mSharedStagingBuffer;
+				Wrapper::StagingBuffer<uint8_t> mSharedStagingBuffer;
 
 				void addAcquire(ResourceAcquireInfo const& info);
 

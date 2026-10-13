@@ -86,6 +86,8 @@ target_sources( mainTarget PRIVATE
     ${WRAPPER_DIR}/commandBuffer.cpp
     ${WRAPPER_DIR}/image.cpp
     ${WRAPPER_DIR}/vulkanBuffer.cpp
+    ${WRAPPER_DIR}/hostVisibleBuffer.cpp
+    ${WRAPPER_DIR}/stagingBuffer.cpp
     ${GEOMETRY_DIR}/mesh.cpp
     ${GEOMETRY_DIR}/common.cpp
     ${MANAGERS_DIR}/descriptorManager.cpp
@@ -111,6 +113,8 @@ target_sources( mainTarget PRIVATE
     ${WRAPPER_HEADER_DIR}/commandBuffer.hpp
     ${WRAPPER_HEADER_DIR}/image.hpp
     ${WRAPPER_HEADER_DIR}/vulkanBuffer.hpp
+    ${WRAPPER_HEADER_DIR}/hostVisibleBuffer.hpp
+    ${WRAPPER_HEADER_DIR}/stagingBuffer.hpp
     ${GEOMETRY_HEADER_DIR}/vertex.hpp
     ${GEOMETRY_HEADER_DIR}/mesh.hpp
     ${GEOMETRY_HEADER_DIR}/common.hpp

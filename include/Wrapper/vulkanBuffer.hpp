@@ -7,8 +7,16 @@
 #include <stb_image.h>
 
 namespace Celer {
+
+	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties, vk::raii::PhysicalDevice& physicalDevice);
+
 	namespace Wrapper {
 
+
+		//set up buffer type
+		//getters for the handles
+		//don't need any staging resources!!!
+		//just a simple wrapper to facilitate seamless creation of vkBuffers
 		class Buffer {
 
 			private:
@@ -20,47 +28,28 @@ namespace Celer {
 
 				uint32_t mQueueOwner{ static_cast<uint32_t>(~0) }; //Might just remove, or keep for tracking purposes
 
-				bool mIsMapped{ false };
-
-			public:
-				//static std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const& ctx);
-				Buffer() = default;
-
-
-				Buffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const &ctx);
-				Buffer(Buffer&& src) noexcept;
-
-				Buffer(Buffer const& src) = delete;
-
-				void* mapMemory();
-
+			protected:
+				void* mapMemory(uint32_t offset, vk::MemoryMapFlags const& memoryMapFlags);
 				void unmapMemory();
 
+			public:
+				Buffer() = default;
+				Buffer(Buffer&& src) = default;
+				Buffer& operator=(Buffer&& src) = default;
+				Buffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, Core::VulkanContext const &ctx);
+				~Buffer() = default;
+				
 
-				static uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties, vk::raii::PhysicalDevice& physicalDevice);
+				Buffer(Buffer const& src) = delete;
+				Buffer& operator=(Buffer const& src) = delete;
 
-				void operator=(Buffer&& src) noexcept;
+				vk::Buffer getBuffer() const;
 
-				static Buffer createDeviceLocalBuffer(vk::DeviceSize deviceSize, Core::VulkanContext vulkanCtx, vk::BufferUsageFlags flags);
+				vk::DeviceSize getSize() const;
 
-				inline vk::Buffer getBuffer() const {
-					return *mVkBuffer;
-				}
+				uint32_t getQueueOwner() const;
 
-				inline vk::DeviceSize getSize() const {
-					return mSize;
-				}
-
-				inline uint32_t getQueueOwner() {
-					return mQueueOwner;
-				}
-
-				inline void setQueueOwner(uint32_t newOwner) {
-					mQueueOwner = newOwner;
-				}
-
-
-
+				void setQueueOwner(uint32_t newOwner);
 
 		};
 
@@ -71,88 +60,11 @@ namespace Celer {
 				std::array<uint8_t, size> mBufferData;
 			public:
 				Wrapper::Buffer mStagingBuffer;
-
-
-		};
-
-
-		/*Just a simple class for the buffer, device memory and a local buffer (CPU) to memcpy the data from*/
-		template<typename T>
-		class BufferStagingResource {
-			private:
-
-				uint32_t mBufferSize{};
-				std::vector<T> mStagingBuffer;
-
-			public:
-
-				Wrapper::Buffer mBuffer;
-
-				BufferStagingResource(BufferStagingResource<T> const &stagingResource) = delete;
-
-				BufferStagingResource(BufferStagingResource<T> &&stagingResource) noexcept {
-					mBufferSize = stagingResource.mBufferSize;
-					mStagingBuffer = std::move(stagingResource.mStagingBuffer);
-					mBuffer = std::move(stagingResource.mBuffer);
-				}
-
-				void operator=(BufferStagingResource<T>&& stagingResource) noexcept {
-					mBufferSize = stagingResource.mBufferSize;
-					mStagingBuffer = std::move(stagingResource.mStagingBuffer);
-					mBuffer = std::move(stagingResource.mBuffer);
-				}
 				
-				BufferStagingResource(std::initializer_list<T> vals) {
-					mStagingBuffer.resize(vals.size());
-					std::copy(vals.begin(), vals.end(), mStagingBuffer.begin());
-				}
 
-				BufferStagingResource(void* data, uint64_t size, Core::VulkanContext& vulkanCtx) {
-					mStagingBuffer.resize(size / sizeof(T));
 
-					memcpy(mStagingBuffer.data(), data, size);
-
-					mBufferSize = mStagingBuffer.size() * sizeof(T);
-					mBuffer = Buffer(mBufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx);
-					
-					
-					copyBufferToLocal();
-				}
-
-				BufferStagingResource(uint32_t byteSize, Core::VulkanContext& vulkanCtx) : mBufferSize{byteSize} {
-					
-					mBuffer = Buffer(mBufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx);
-					mStagingBuffer.resize(byteSize);
-				}
-
-				void initVulkanBuffer(Core::VulkanContext vulkanCtx, vk::BufferUsageFlags bufferUsage) {
-					mBufferSize = mStagingBuffer.size() * sizeof(mStagingBuffer[0]);
-					mBuffer = Buffer(mBufferSize, bufferUsage, vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible, vulkanCtx);
-					
-				}
-
-				void appendToBuffer(std::initializer_list<T> vals) {
-					std::copy(vals.begin(), vals.end(), std::back_inserter(mStagingBuffer));
-				}
-
-				void copyBufferToLocal() {
-					void* data{ mBuffer.mapMemory() };
-
-					memcpy(data, mStagingBuffer.data(), mBufferSize);
-				}
-
-				vk::DeviceSize getSize() {
-					return static_cast<vk::DeviceSize>(mBufferSize);
-				}
-
-				vk::Buffer getUnderlyingBuffer() {
-					return mBuffer.getBuffer();
-				}
-
-				~BufferStagingResource() {
-					mBuffer.unmapMemory();
-				}
 		};
+
 
 		
 

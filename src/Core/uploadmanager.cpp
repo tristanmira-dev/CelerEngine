@@ -194,8 +194,9 @@ namespace Celer {
 		
 		}
 
-		ResourceUploadInfo::ResourceUploadInfo(ResourceType resourceType, Memory memory, void* data, VulkanContext& ctx, vk::Image image, vk::Buffer buffer, uint32_t width, uint32_t height) : mResourceType{ resourceType }, mMemoryInfo{ memory }, mBuffer(data, memory.getSize(), ctx), mImageResource{ image }, mBufferResource{ buffer }, mWidth{ width }, mHeight{ height } {
-			
+		ResourceUploadInfo::ResourceUploadInfo(ResourceType resourceType, Memory memory, void* data, VulkanContext& ctx, vk::Image image, vk::Buffer buffer, uint32_t width, uint32_t height) : mResourceType{ resourceType }, mMemoryInfo{ memory }, mBuffer(memory.getSize(), ctx), mImageResource{ image }, mBufferResource{ buffer }, mWidth{ width }, mHeight{ height } {
+			mBuffer.addToLocalContainer(data);
+			mBuffer.copyToMappedBuffer();
 		
 		}
 

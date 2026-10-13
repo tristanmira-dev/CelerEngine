@@ -2,6 +2,7 @@
 #define DEVICEMEMMANAGER_HPP
 
 #include "vulkanBuffer.hpp"
+#include "hostVisibleBuffer.hpp"
 #include "vertex.hpp"
 #include "contexts.hpp"
 #include "commandBuffer.hpp"
@@ -46,13 +47,13 @@ namespace Celer {
 
 				/*Linear buffers*/
 				Wrapper::Buffer mMainBuffer;
-				Wrapper::Buffer mStagingBuffer;
+				Wrapper::HostBuffer mStagingBuffer;
 				void* mMappedStagingBuff;
 				std::list<Memory> mMemoryTracker; //Separate user defined class later probably (the logic for memory alloc)
 				//
 
 				/*Descriptor buffers*/
-				Wrapper::Buffer mDescriptorBuffer;
+				Wrapper::HostBuffer mDescriptorBuffer;
 				void* mDescriptorMappedBuff;
 				std::list<Memory> mDescriptorMemoryTracker;
 				//
