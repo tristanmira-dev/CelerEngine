@@ -18,8 +18,9 @@ namespace Celer {
 
 				vk::raii::SwapchainKHR mSwapchain{ nullptr };
 				vk::SurfaceFormatKHR mSwapchainSurfaceFormat;
-				Wrapper::NonOwnedImageCollection mSwapchainImages;
+				std::vector<vk::Image> mSwapchainImages;
 				vk::Extent2D mSwapchainExtent;
+				std::vector<vk::raii::ImageView> mSwapchainImageViews;
 
 				/*Functions*/
 

@@ -28,9 +28,11 @@ namespace Celer {
 			//std::vector<vk::ImageView>* swapchainImageViews;
 			vk::Extent2D* swapchainExtent;
 			
-			Wrapper::NonOwnedImageCollection* swapChainImages;
+			std::vector<vk::Image>* swapChainImages;
 
 			vk::raii::SwapchainKHR* swapchain;
+
+			std::vector<vk::raii::ImageView>* swapChainImageViews;
 		};
 	}
 

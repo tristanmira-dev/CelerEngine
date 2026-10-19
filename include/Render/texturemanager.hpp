@@ -13,14 +13,14 @@ namespace Celer {
 				//Wrapper::OwnedImage mImage;
 				Wrapper::CommandBuffer mCommandBuff;
 				//Wrapper::OwnedImageCollection mImageCollection;
-				Wrapper::ImageCollectionRefactor mImageCollection;
+				Wrapper::ImageCollection mImageCollection;
 				std::vector<Core::Memory> mMemory;
 
 			public:
 
 				vk::raii::ImageView const& getImageView(uint32_t idx);
 
-				vk::raii::Sampler mSampler = nullptr;
+				vk::raii::Sampler mSampler{ nullptr };
 
 				TextureManager(Core::DeviceMemoryManager& deviceManager, Core::VulkanContext& ctx);
 

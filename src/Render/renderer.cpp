@@ -115,7 +115,8 @@ namespace Celer {
 		void Renderer::recordDrawCommands(uint32_t imageIdx, Core::SwapchainContext& swapchainCtx, Pipeline& pipeline, Geometry::MeshManager& meshManager, Core::Window &window, std::vector<vk::raii::DescriptorSet>& descriptorSet, Managers::GameObjectManager& gameObjectManager) {
 			vk::raii::CommandBuffer& currentCommandBuff{ mCommandBuffer.getCommandBuffer(mCurrentFrameIdx) };
 
-			auto& swapChainImg{ swapchainCtx.swapChainImages->getImage(imageIdx) };
+			vk::Image swapChainImg{ swapchainCtx.swapChainImages->at(imageIdx) };
+			vk::raii::ImageView& swapChainImgView{ swapchainCtx.swapChainImageViews->at(imageIdx) };
 
 			currentCommandBuff.begin({});
 
@@ -128,7 +129,7 @@ namespace Celer {
 			eColorAttachmentOutput (srcStage) — wait for the color output stage to be free
 			eColorAttachmentOutput (dstStage) — the stage that will use it next is also color output
 			*/
-			swapChainImg.transitionImageLayout(vk::ImageLayout::eUndefined, vk::ImageLayout::eColorAttachmentOptimal, {}, vk::AccessFlagBits2::eColorAttachmentWrite, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::ImageAspectFlagBits::eColor, currentCommandBuff);
+			Wrapper::transitionImageLayout(swapChainImg, vk::ImageLayout::eUndefined, vk::ImageLayout::eColorAttachmentOptimal, {}, vk::AccessFlagBits2::eColorAttachmentWrite, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::ImageAspectFlagBits::eColor, currentCommandBuff);
 			//transition_image_layout(
 			//	*depthImage,
 			//	vk::ImageLayout::eUndefined,
@@ -149,7 +150,7 @@ namespace Celer {
 			storeOp — what to do after rendering. Store = keep the pixels (you need them for presenting)
 			clearValue — the black color (RGBA 0,0,0,1)*/
 			vk::RenderingAttachmentInfo attachmentInfo{
-				.imageView = swapChainImg.mImageView,
+				.imageView = swapChainImgView,
 				.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
 				.loadOp = vk::AttachmentLoadOp::eClear,
 				.storeOp = vk::AttachmentStoreOp::eStore,
@@ -240,7 +241,7 @@ namespace Celer {
 
 			*/
 
-			swapChainImg.transitionImageLayout(vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::ePresentSrcKHR, vk::AccessFlagBits2::eColorAttachmentWrite, {}, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eBottomOfPipe, vk::ImageAspectFlagBits::eColor, currentCommandBuff);
+			Wrapper::transitionImageLayout(swapChainImg, vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::ePresentSrcKHR, vk::AccessFlagBits2::eColorAttachmentWrite, {}, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eBottomOfPipe, vk::ImageAspectFlagBits::eColor, currentCommandBuff);
 
 			currentCommandBuff.end();
 
@@ -253,7 +254,7 @@ namespace Celer {
 			mTransferFence = vk::raii::Fence(*vulkanCtx.device, vk::FenceCreateInfo{ });
 
 
-			std::size_t size{ swapchainCtx.swapChainImages->getSize() };
+			std::size_t size{ swapchainCtx.swapChainImages->size() };
 
 			for (size_t i{}; i < size; ++i) {
 

@@ -54,14 +54,14 @@ namespace Celer {
 
 		SwapchainContext Swapchain::getContext() {
 			return SwapchainContext{
-				//.swapchainImages = &mSwapchainImages,
 				.swapchainSurfaceFormat = &mSwapchainSurfaceFormat,
-				//.swapchainImageViews = &mSwapchainImageViews,
 				.swapchainExtent = &mSwapchainExtent,
 
 				.swapChainImages = &mSwapchainImages,
 
-				.swapchain = &mSwapchain
+				.swapchain = &mSwapchain,
+
+				.swapChainImageViews = &mSwapchainImageViews
 
 			};
 		}
@@ -113,12 +113,26 @@ namespace Celer {
 			std::cout << "Extent: " << mSwapchainExtent.width << "x" << mSwapchainExtent.height << "\n";
 			std::cout << physicalDevice.getProperties().deviceName << '\n';
 
+			mSwapchainImages = mSwapchain.getImages();
+
 		}
 
 
 		void Swapchain::createImageView(vk::raii::Device &device) {
 
-			mSwapchainImages.addImagesWithView(mSwapchain.getImages(), mSwapchainSurfaceFormat.format, device);
+
+			vk::ImageViewCreateInfo imageViewCreateInfo{
+				.viewType = vk::ImageViewType::e2D,
+				.format = mSwapchainSurfaceFormat.format,
+				.subresourceRange = { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 },
+			};
+
+
+			for (int i{}; i < mSwapchainImages.size(); ++i) {
+				imageViewCreateInfo.image = mSwapchainImages[i];
+				mSwapchainImageViews.emplace_back(device, imageViewCreateInfo);
+			}
+
 			std::cout << "Swapchain image (handle to non-owned) and imageviews created!\n";
 		
 		}

@@ -38,8 +38,7 @@ namespace Celer {
 			int texWidth, texHeight, texChannels;
 			stbi_uc* pixels = stbi_load(file, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
-			if (!pixels)
-			{
+			if (!pixels) {
 				throw std::runtime_error("failed to load texture image!");
 			}	
 
