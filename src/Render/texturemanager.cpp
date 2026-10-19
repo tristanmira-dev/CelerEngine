@@ -1,6 +1,7 @@
 
 #include "vulkanBuffer.hpp"
 #include "texturemanager.hpp"
+#include "uploadableImage.hpp"
 
 namespace {
 	
@@ -56,7 +57,7 @@ namespace Celer {
 			assert(mMemory.back().getSize() == imageMemReq.size && "WARNING, DIFFERENT MEMORY FROM THE IMAGE MEM REQUIREMENT");
 
 			//ADD ACTUAL UPLOAD REQUEST TO QUEUE(NOT ANY GRAPHICS QUEUE, UPLOAD MANAGER'S PENDING UPLOADS)
-			uploadManager.addImageResource(ctx, Core::ResourceType::IMAGE, mMemory.back(), static_cast<void*>(pixels), *mImageCollection.back().getImage(), texWidth, texHeight);
+			uploadManager.queueUploadResource(Resource::UploadableImage::create(texWidth, texHeight, static_cast<void*>(pixels), ctx, *mImageCollection.back().getImage(), mMemory.back()));
 
 			/*align*/
 

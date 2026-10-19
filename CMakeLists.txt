@@ -46,12 +46,16 @@ set(GEOMETRY_DIR ${CMAKE_SOURCE_DIR}/src/Geometry)
 set(MANAGERS_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Managers)
 set(MANAGERS_DIR ${CMAKE_SOURCE_DIR}/src/Managers)
 
+set(RESOURCES_HEADER_DIR ${CMAKE_SOURCE_DIR}/include/Resources)
+set(RESOURCES_DIR ${CMAKE_SOURCE_DIR}/src/Resources)
+
 #include directories
 target_include_directories(mainTarget PRIVATE ${CORE_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${RENDER_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${WRAPPER_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${GEOMETRY_HEADER_DIR})
 target_include_directories(mainTarget PRIVATE ${MANAGERS_HEADER_DIR})
+target_include_directories(mainTarget PRIVATE ${RESOURCES_HEADER_DIR})
 
 #defines----------------------------------------------------------------------------------------
 target_compile_definitions(mainTarget PRIVATE VULKAN_HPP_NO_STRUCT_CONSTRUCTORS) #CPP 20 feature
@@ -92,6 +96,7 @@ target_sources( mainTarget PRIVATE
     ${GEOMETRY_DIR}/common.cpp
     ${MANAGERS_DIR}/descriptorManager.cpp
     ${MANAGERS_DIR}/gameObjectManager.cpp
+    ${RESOURCES_DIR}/uploadableImage.cpp
 )
 
 target_sources( mainTarget PRIVATE 
@@ -121,6 +126,9 @@ target_sources( mainTarget PRIVATE
     ${GEOMETRY_HEADER_DIR}/descriptors.hpp
     ${MANAGERS_HEADER_DIR}/descriptorManager.hpp
     ${MANAGERS_HEADER_DIR}/gameObjectManager.hpp
+    ${RESOURCES_HEADER_DIR}/uploadableImage.hpp
+    ${RESOURCES_HEADER_DIR}/uploadableResource.hpp
+    ${RESOURCES_HEADER_DIR}/ownershipTransfer.hpp
 )
 
 #dependencies------------------------------------------------------------------------------------

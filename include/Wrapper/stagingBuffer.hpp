@@ -1,3 +1,7 @@
+#ifndef WRAPPER_STAGING_BUFFER_HPP
+#define WRAPPER_STAGING_BUFFER_HPP
+
+
 /**
  * @file stagingBuffer.hpp
  * @brief Declares Celer::Wrapper::StagingBuffer, a CPU-side staging buffer
@@ -195,3 +199,4 @@ namespace Celer {
 
 }
 
+#endif
