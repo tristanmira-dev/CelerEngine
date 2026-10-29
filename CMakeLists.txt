@@ -97,6 +97,7 @@ target_sources( mainTarget PRIVATE
     ${MANAGERS_DIR}/descriptorManager.cpp
     ${MANAGERS_DIR}/gameObjectManager.cpp
     ${RESOURCES_DIR}/uploadableImage.cpp
+    ${RESOURCES_DIR}/uploadableBuffer.cpp
 )
 
 target_sources( mainTarget PRIVATE 
@@ -129,6 +130,7 @@ target_sources( mainTarget PRIVATE
     ${RESOURCES_HEADER_DIR}/uploadableImage.hpp
     ${RESOURCES_HEADER_DIR}/uploadableResource.hpp
     ${RESOURCES_HEADER_DIR}/ownershipTransfer.hpp
+    ${RESOURCES_HEADER_DIR}/uploadableBuffer.hpp
 )
 
 #dependencies------------------------------------------------------------------------------------

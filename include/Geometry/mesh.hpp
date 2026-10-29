@@ -3,6 +3,7 @@
 
 #include "vertex.hpp"
 #include "deviceMemManager.hpp"
+#include "uploadManager.hpp"
 
 namespace Celer {
 	namespace Geometry {
@@ -20,6 +21,8 @@ namespace Celer {
 				Core::Memory mAllocatedVertexMem;
 				Core::Memory mAllocatedIndicesMem;
 
+				vk::Buffer mBufferHandle;
+
 				std::vector<MeshInfo> mMeshInfo;
 
 			public:
@@ -32,8 +35,8 @@ namespace Celer {
 
 				/*OFFLOAD THIS TO THE UPLOAD MANAGER!*/
 				void addVertices(std::initializer_list<Vertex>&& initList);
-				void submitMesh(Core::VulkanContext& vulkanCtx, bool endOfBatch = true);
-				void submitIndices(Core::VulkanContext& vulkanCtx, bool endOfBatch = true);
+				void submitMesh(Core::VulkanContext& vulkanCtx, Core::UploadManager& uploadManager);
+				void submitIndices(Core::VulkanContext& vulkanCtx, Core::UploadManager& uploadManager);
 				/*---------------------------------------------------------------*/
 
 				inline uint32_t getVertexCount() {

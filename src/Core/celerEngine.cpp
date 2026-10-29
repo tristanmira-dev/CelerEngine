@@ -1,6 +1,7 @@
 #include "celerEngine.hpp"
 #include "mesh.hpp"
 #include "descriptors.hpp"
+#include "uploadableBuffer.hpp"
 
 namespace Celer {
 
@@ -69,20 +70,20 @@ namespace Celer {
 			});
 
 
-			mMeshManager.submitMesh(mVulkanContext, false);
-
 			mMeshManager.addIndices({
 				0, 1, 2, 0, 2, 3
 			});
 
-			mMeshManager.submitIndices(mVulkanContext, false);
+
+
+
+			mMeshManager.submitMesh(mVulkanContext, mUploadManager);
+
+			mMeshManager.submitIndices(mVulkanContext, mUploadManager);
 
 			mGameObjectManager.addGameObject({ .transform = glm::mat4(1.f), .textureIdx = 1 } , { .meshIndex = 0 });
 			mGameObjectManager.addGameObject({ .transform = glm::translate(glm::mat4(1.f), glm::vec3(3.f, 0.f, 0.f)), .textureIdx = 1 }, { .meshIndex = 0 });
 			mGameObjectManager.addGameObject({ .transform = glm::translate(glm::mat4(1.f), glm::vec3(5.f, 2.f, 4.f)), .textureIdx = 1 }, { .meshIndex = 0 });
-
-
-			mDeviceMemManager.transferOwnership(mVulkanContext, mVulkanContext.transferQueueIdx, mVulkanContext.graphicsQueueIdx);
 
 
 			while (!mWindow.shouldClose()) {

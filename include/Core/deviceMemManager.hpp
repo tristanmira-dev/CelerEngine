@@ -82,11 +82,9 @@ namespace Celer {
 
 				vk::Buffer getDescriptorBuffer();
 				
-				void batchUpload(VulkanContext& vulkanCtx, Memory const& memory, std::size_t dataSize);
 
 				void createImageDeviceBuffer(VulkanContext& vulkanCtx, vk::DeviceSize deviceSize);
 
-				void transferOwnership(VulkanContext& vulkanCtx, uint32_t oldQueueIdx, uint32_t newQueueIdx);
 
 				uint32_t getAlignedOffset(uint32_t bytes, uint32_t alignTo);
 
@@ -94,20 +92,13 @@ namespace Celer {
 					return mMainBuffer.getQueueOwner();
 				}
 
-				void beginBatchUpload();
-
-				void endBatchUpload();
-
-				void mainBuffAcquireQueueOwnership(Wrapper::CommandBuffer& commandBuffer, uint32_t commandBufferIdx, uint32_t oldOwnerIdx, uint32_t newOwnerIdx, vk::raii::Queue& queue, vk::raii::Fence& fence);
 
 				inline vk::Buffer getMainBuffer() {
 					return mMainBuffer.getBuffer();
 				}
 
 				void bindImage(vk::raii::Image const& img, Memory const& memory);
-				
-
-				void transferMemoryToLocalBuffer(VulkanContext& vulkanCtx, Memory const &memory, std::size_t dataSize, bool endOfBatch = true);
+			
 
 				template<typename T>
 				Memory allocateMemory(uint32_t size) {

@@ -1,4 +1,5 @@
 #include "mesh.hpp"
+#include "uploadableBuffer.hpp"
 
 
 namespace Celer {
@@ -9,6 +10,7 @@ namespace Celer {
 		MeshManager::MeshManager(Core::DeviceMemoryManager& memManager) : mMemManager{ memManager } {
 			mAllocatedVertexMem = mMemManager.allocateMemory<Vertex>(1024 * 1024 * 100);
 			mAllocatedIndicesMem = mMemManager.allocateMemory<uint32_t>(1024 * 1024 * 100);
+			mBufferHandle = memManager.getMainBuffer();
 		}
 
 		MeshInfo MeshManager::getMeshInfo(uint32_t idx) {
@@ -17,7 +19,6 @@ namespace Celer {
 
 		void MeshManager::addVertices(std::initializer_list<Vertex> &&initList) {
 			std::copy(initList.begin(), initList.end(), std::back_inserter(mLocalVerticesData));
-			//mLocalVerticesData.push_back(Vertex{ glm::vec3{1.f, 1.f, 1.f}, glm::vec3{0.f,0.f,0.f}, glm::vec2{1.f, 1.f} });
 		}
 
 		void MeshManager::addIndices(std::initializer_list<uint32_t>&& initList) {
@@ -30,19 +31,16 @@ namespace Celer {
 				mMeshInfo.push_back(MeshInfo{ .offset = info.offset + info.indicesCount, .indicesCount = static_cast<uint32_t>(initList.size()) });
 
 			}
-			//mLocalVerticesData.push_back(Vertex{ glm::vec3{1.f, 1.f, 1.f}, glm::vec3{0.f,0.f,0.f}, glm::vec2{1.f, 1.f} });
 		}
 
 
-		void MeshManager::submitMesh(Core::VulkanContext& vulkanCtx, bool endOfBatch) {
-			mMemManager.addToDeviceBuffer(mLocalVerticesData, vulkanCtx);
-			mMemManager.transferMemoryToLocalBuffer(vulkanCtx, mAllocatedVertexMem, getSizeOfLocalInBytes(mLocalVerticesData), endOfBatch);
+		void MeshManager::submitMesh(Core::VulkanContext& vulkanCtx, Core::UploadManager& uploadManager) {
+			uploadManager.queueUploadResource(Resource::UploadableBuffer::create(vulkanCtx, mBufferHandle, mAllocatedVertexMem, mLocalVerticesData.data(), sizeof(mLocalVerticesData[0]) * mLocalVerticesData.size()));
 		}
 
 
-		void MeshManager::submitIndices(Core::VulkanContext& vulkanCtx, bool endOfBatch) {
-			mMemManager.addToDeviceBuffer(mLocalIndexData, vulkanCtx);
-			mMemManager.transferMemoryToLocalBuffer(vulkanCtx, mAllocatedIndicesMem, getSizeOfLocalInBytes(mLocalIndexData), endOfBatch);
+		void MeshManager::submitIndices(Core::VulkanContext& vulkanCtx, Core::UploadManager& uploadManager) {
+			uploadManager.queueUploadResource(Resource::UploadableBuffer::create(vulkanCtx, mBufferHandle, mAllocatedIndicesMem, mLocalIndexData.data(), sizeof(mLocalIndexData[0]) * mLocalIndexData.size()));
 
 		}
 

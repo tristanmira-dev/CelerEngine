@@ -130,6 +130,9 @@ namespace Celer {
 			 */
 			void clearLocalContainer();
 
+
+			uint32_t getSizeInBytes();
+
 		};
 
 		template<typename T>
@@ -191,6 +194,12 @@ namespace Celer {
 		template<typename T>
 		void StagingBuffer<T>::clearLocalContainer() {
 			mLocalContainer.clear();
+		}
+
+		template<typename T>
+		inline uint32_t StagingBuffer<T>::getSizeInBytes()
+		{
+			return mBufferSize;
 		}
 
 	}

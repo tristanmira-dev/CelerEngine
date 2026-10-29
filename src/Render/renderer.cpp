@@ -33,14 +33,6 @@ namespace Celer {
 
 			//updateUniformBuffer(frameIdx);
 
-			//TODO DELEGATE TO UPLOAD MANAGER
-			if (memManager.getMainBuffOwner() != vulkanCtx.graphicsQueueIdx) {
-				memManager.mainBuffAcquireQueueOwnership(mCommandBuffer, mCurrentFrameIdx, memManager.getMainBuffOwner(), vulkanCtx.graphicsQueueIdx, *vulkanCtx.graphicsQueue, mTransferFence);
-				vulkanCtx.device->waitForFences(*mTransferFence, vk::True, UINT64_MAX);
-				vulkanCtx.device->resetFences(*mTransferFence);
-				mCommandBuffer.getCommandBuffer(mCurrentFrameIdx).reset();
-			}
-
 			updateDescriptorBuffers(window, mCurrentFrameIdx, memManager, descriptorManager, gameObjectManager);
 
 			recordDrawCommands(imageIndex, swapchainCtx, pipeline, meshManager, window, descriptor, gameObjectManager);
